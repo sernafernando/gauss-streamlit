@@ -18,8 +18,6 @@ try:
 except locale.Error:
     print("La configuración regional 'es_AR.UTF-8' no está disponible, utilizando configuración predeterminada.")
 
-st.title("Dashboard")
-
 st.logo(image="images/white-g-logo.png", 
         icon_image="images/white-g.png")
 
@@ -69,13 +67,6 @@ with st.sidebar:
 
 # Aquí puedes continuar con el resto de tu código usando las fechas seleccionadas
 #st.write(f"Rango de fechas seleccionado: {from_date} a {to_date}")
-
-
-"""
-# Ventas ML
-Consulta de Ventas ML
-
-"""
 
 pusername = st.secrets["api"]["username"]
 ppassword = st.secrets["api"]["password"]
@@ -213,7 +204,11 @@ df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
 df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
 
 # Crear columna de costo en pesos
-df['Costo en pesos'] = df['Costo_sin_IVA'] * df['Cambio_al_Momento']
+df['Costo en pesos'] = np.where(
+    df['Moneda_Costo'] == 2,
+    df['Costo_sin_IVA'] * df['Cambio_al_Momento'],
+    df['Costo_sin_IVA']
+)
 
 # subcat to group
 data_subcat = {
@@ -300,21 +295,70 @@ def limpiar(row):
         contar_si = df_merged['ML_pack_id'].value_counts().get(row['ML_pack_id'], 1)  # Cuenta las ocurrencias de ML_pack_id en la columna
         return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / contar_si) / 1.21) - row['Comisión en pesos']
 
+
+
 # Aplicar la función a cada fila y guardar el resultado en una nueva columna
 df_merged['Limpio'] = df_merged.apply(limpiar, axis=1)
 
+def totalizar_costo(row):
+    return row['Costo en pesos']*row['Cantidad']
+
+df_merged['costo_total'] = df_merged.apply(totalizar_costo, axis=1)
+
+def totalizar_costo_iva(row):
+    return row['costo_total']*(1+(row['IVA']/100))
+
+df_merged['costo_total_iva'] = df_merged.apply(totalizar_costo_iva, axis=1)
+
 # Calculamos el MarkUp
 def markupear(row):
-    return ((row['Limpio'] / ((row['Costo en pesos']*row['Cantidad'])*(1+(row['IVA']/100))))-1)*100
+    # Manejar división por cero y valores nulos
+    if row['costo_total_iva'] == 0 or pd.isnull(row['costo_total_iva']):
+        return None  # O un valor adecuado que prefieras
+    return ((row['Limpio'] / row['costo_total_iva']) - 1) * 100
 
 # Aplicamos la función y formateamos el resultado.
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
 df_merged['MarkUp'] = df_merged['MarkUp'].apply(lambda x: f"{x:.2f}%")
 
-print(df_merged['Limpio'][:10], df_merged['Costo en pesos'][:10], df_merged['Cantidad'][:10], df_merged['IVA'][:10])
-# Resultado final
-df_merged
+total_limpio = df_merged['Limpio'].sum()
+total_costo = df_merged['costo_total_iva'].sum()
+total_comision = df_merged['Comisión en pesos'].sum()
+total_markup = ((total_limpio / total_costo)-1)*100
 
+total_limpio = f"{total_limpio:.2f}"
+total_costo = f"{total_costo:.2f}"  
+total_comision = f"{total_comision:.2f}"
+total_markup = f"{total_markup:.2f}%"
+
+# Visualización del contenido
+
+"""
+# Ventas ML
+Consulta de Ventas ML
+
+"""
+
+columna_metricas = st.columns(4)
+
+# Metricas
+with columna_metricas[0]:
+    st.metric("Total Limpio", total_limpio)
+
+with columna_metricas[1]:
+    st.metric("Total Costo", total_costo)
+
+with columna_metricas[2]:    
+    st.metric("Total Comisión", total_comision)
+
+with columna_metricas[3]:               
+    st.metric("Total MarkUp", total_markup)
+
+# Línea separadora
+st.markdown("---")
+
+# Resultado final
+#df_merged
 
 with st.expander("Filtro de columnas"):
     # Inicializa el estado de la sesión si no existe
