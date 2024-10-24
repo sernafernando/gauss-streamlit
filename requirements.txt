@@ -1,0 +1,10 @@
+requests
+lxml
+html
+re
+dateutil.relativedelta
+pandas
+streamlit
+datetime
+locale
+numpy
