@@ -1,5 +1,6 @@
 import requests
 from lxml import etree
+import xml.sax
 import html
 import json
 import re
@@ -9,6 +10,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import locale
 import numpy as np
+import io
 
 # Set page config
 st.set_page_config(page_title="Gauss Online Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
@@ -108,6 +110,26 @@ def authenticate():
     
     return token
 
+class LargeXMLHandler(xml.sax.ContentHandler):
+    def __init__(self):
+        self.result_content = []
+        self.is_in_result = False
+
+    def startElement(self, name, attrs):
+        # Cuando el parser encuentra el inicio de un elemento
+        if name == 'wsGBPScriptExecute4DatasetResult':
+            self.is_in_result = True
+
+    def endElement(self, name):
+        # Cuando el parser encuentra el final de un elemento
+        if name == 'wsGBPScriptExecute4DatasetResult':
+            self.is_in_result = False
+
+    def characters(self, content):
+        # Al encontrar contenido de texto dentro de un nodo
+        if self.is_in_result:
+            self.result_content.append(content)
+
 def dashboard():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
@@ -127,63 +149,45 @@ def dashboard():
             </wsGBPScriptExecute4Dataset>
         </soap:Body>
     </soap:Envelope>'''
-    header_ws =  {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
-    # Hacemos la solicitud POST
+    
+    header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
     response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
 
-    # Verificamos si la respuesta fue exitosa
     if response.status_code != 200:
         print(f"Error en la solicitud: {response.status_code}")
         return
 
     print("Consulta a la API exitosa")
-    # Parsear la respuesta XML
-    namespaces = {
-        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-        'microsoft': 'http://microsoft.com/webservices/'
-    }
-
-    # Pasar el contenido directamente como bytes
-    xml_string = response.content  # Aquí ya tienes el contenido en bytes
-
-    # Parsear el XML
-    root = etree.fromstring(xml_string)
-
-    # Extraer el contenido de wsGBPScriptExecute4DatasetResult
-    result_node = root.xpath('//microsoft:wsGBPScriptExecute4DatasetResult', namespaces=namespaces)
-    if not result_node:
-        print("No se encontró el nodo wsGBPScriptExecute4DatasetResult.")
-        return
-
-    result_content = result_node[0].text
     
-
+    # Creamos el parser y el manejador
+    parser = xml.sax.make_parser()
+    handler = LargeXMLHandler()
+    parser.setContentHandler(handler)
     
+    # Parseamos el XML
+    xml_content = response.content
+    xml.sax.parseString(xml_content, handler)
 
-    # Desescapar el contenido HTML
+    # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
+    result_content = ''.join(handler.result_content)
+
+    # Procesar el JSON que está dentro de <Column1>
     unescaped_result = html.unescape(result_content)
-
-    # Extraer el JSON dentro de <Column1>
     match = re.search(r'\[.*?\]', unescaped_result)
+    
     if match:
-        column1_json = match.group(0)  # Esto te dará la parte JSON entre corchetes
+        column1_json = match.group(0)
     else:
         print("No se encontró contenido JSON en Column1.")
         return
 
-    
-    
     try:
         column1_list = json.loads(column1_json)
     except json.JSONDecodeError as e:
         print(f"Error al decodificar el JSON: {e}")
 
-    
     global df
     df = pd.DataFrame(column1_list)
-
-   
-
 
 authenticate()
 dashboard()
