@@ -13,7 +13,10 @@ import numpy as np
 # Set page config
 st.set_page_config(page_title="Gauss Online Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
 # Establecer el locale para el formato deseado
-locale.setlocale(locale.LC_ALL, 'es_AR.UTF-8')
+try:
+    locale.setlocale(locale.LC_ALL, 'es_AR.UTF-8')
+except locale.Error:
+    print("La configuración regional 'es_AR.UTF-8' no está disponible, utilizando configuración predeterminada.")
 
 st.title("Dashboard")
 

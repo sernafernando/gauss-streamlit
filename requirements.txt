@@ -4,3 +4,4 @@ pandas
 streamlit
 python-dateutil
 numpy
+locale
