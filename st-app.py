@@ -326,44 +326,116 @@ def markupear(row):
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
 df_merged['MarkUp'] = df_merged['MarkUp'].apply(lambda x: f"{x:.2f}%")
 
-total_limpio = df_merged['Limpio'].sum()
-total_costo = df_merged['costo_total_iva'].sum()
-total_comision = df_merged['Comisión en pesos'].sum()
-total_markup = ((total_limpio / total_costo)-1)*100
 
-total_limpio = f"{total_limpio:.2f}"
-total_costo = f"{total_costo:.2f}"  
-total_comision = f"{total_comision:.2f}"
-total_markup = f"{total_markup:.2f}%"
-
-# Visualización del contenido
+# Main Page
 
 """
 # Ventas ML
 Consulta de Ventas ML
 
 """
+#  Verificar que la fecha de inicio no sea mayor a la fecha de fin
+if from_date > to_date:
+    st.error("La fecha de inicio no puede ser mayor a la fecha de fin.")
+else:
+    st.success(f"Consultando datos desde {from_date} hasta {to_date}")
+# Teoricamente hacemos gráficos con esto
+# Definir las métricas a mostrar
+# Formatear los totales
+total_limpio = df_merged['Limpio'].sum()
+total_costo = df_merged['costo_total_iva'].sum()
+total_comision = df_merged['Comisión en pesos'].sum()
+total_markup = ((total_limpio / total_costo)-1)*100
 
-columna_metricas = st.columns(4)
+totales = {
+    "Total Limpio": f"{total_limpio:.2f}",
+    "Total Costo": f"{total_costo:.2f}",
+    "Total Comisión": f"{total_comision:.2f}",
+    "Total Markup": f"{total_markup:.2f}%"
+}
 
-# Metricas
-with columna_metricas[0]:
-    st.metric("Total Limpio", total_limpio)
+# Crear gráficos para los totales
+def display_totals(totales):
+    cols = st.columns(len(totales))
+    for col, (title, value) in zip(cols, totales.items()):
+        with col:
+            with st.container(border=True):
+                    st.metric(title, value)  # Muestra la métrica
+            #   st.bar_chart([total_limpio, total_costo, total_comision], use_container_width=True)  # Gráfico de barras
 
-with columna_metricas[1]:
-    st.metric("Total Costo", total_costo)
+# Mostrar totales en la aplicación
+st.subheader("Total periodo")
+display_totals(totales)
 
-with columna_metricas[2]:    
-    st.metric("Total Comisión", total_comision)
-
-with columna_metricas[3]:               
-    st.metric("Total MarkUp", total_markup)
+# Visualización del contenido
 
 # Línea separadora
 st.markdown("---")
 
 # Resultado final
 #df_merged
+
+# Copia de df_merged
+df_filter = df_merged.copy()
+
+# Asegurarse de que las columnas de fechas estén en formato datetime
+df_merged['Fecha'] = pd.to_datetime(df_merged['Fecha'], errors='coerce', format="%d/%m/%Y %H:%M:%S")
+
+# Filtro por 'Marca' en el DataFrame
+unique_brands = df_merged['Marca'].unique()
+sorted_brands = sorted(unique_brands)
+col_selectbox = st.columns(5)
+
+with col_selectbox[0]:
+    selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
+
+# Filtrar por marca seleccionada
+df_filter = df_merged.copy()
+if selected_brand != "Todas":
+    df_filter = df_filter[df_filter['Marca'] == selected_brand]
+
+
+# Crear dos entradas de fecha
+with col_selectbox[1]:
+    start_date = st.date_input("Fecha inicial:", value=df_merged['Fecha'].min())
+
+with col_selectbox[2]:
+    end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max())
+
+# Filtrar el DataFrame en base a las fechas seleccionadas
+df_filter = df_filter[(df_filter['Fecha'] >= pd.to_datetime(start_date)) & 
+                      (df_filter['Fecha'] <= pd.to_datetime(end_date))]
+
+filtro_monto_total = df_filter['Monto_Total'].sum()
+
+# Formatear los totales
+total_limpio_filtered = df_filter['Limpio'].sum()
+total_costo_filtered = df_filter['costo_total_iva'].sum()
+total_comision_filtered = df_filter['Comisión en pesos'].sum()
+total_markup_filtered = ((total_limpio_filtered / total_costo_filtered)-1)*100
+
+totales_filtered = {
+    "Total Limpio": f"{total_limpio_filtered:.2f}",
+    "Total Costo": f"{total_costo_filtered:.2f}",
+    "Total Comisión": f"{total_comision_filtered:.2f}",
+    "Total Markup": f"{total_markup_filtered:.2f}%"
+}
+
+# Crear gráficos para los totales
+def display_totals_filtered(totales):
+    cols = st.columns(len(totales))
+    for col, (title, value) in zip(cols, totales.items()):
+        with col:
+            with st.container(border=True):
+                    st.metric(title, value)  # Muestra la métrica
+            #   st.bar_chart([total_limpio, total_costo, total_comision], use_container_width=True)  # Gráfico de barras
+
+# Mostrar totales en la aplicación
+st.subheader("Total filtro")
+display_totals(totales_filtered)
+
+# Línea separadora
+st.markdown("---")
 
 with st.expander("Filtro de columnas"):
     # Inicializa el estado de la sesión si no existe
@@ -380,7 +452,7 @@ with st.expander("Filtro de columnas"):
 
 
     # Crear checkboxes para cada columna
-    for i, column in enumerate(df_merged.columns):
+    for i, column in enumerate(df_filter.columns):
         with columns[i % num_columns]:  # Colocar el checkbox en la columna correspondiente
             checked = column in st.session_state.selected_columns
             if st.checkbox(column, value=checked):
@@ -391,23 +463,9 @@ with st.expander("Filtro de columnas"):
                     st.session_state.selected_columns.remove(column)
 
 # Filtrar el DataFrame según las columnas seleccionadas
-filtered_df = df_merged[st.session_state.selected_columns]
-
-
-# Filtro por 'Marca' en el DataFrame filtrado
-if 'Marca' in st.session_state.selected_columns:  # Verificar si 'Marca' está seleccionada
-    unique_brands = df_merged['Marca'].unique()  # Obtener marcas únicas del DataFrame filtrado
-    sorted_brands = sorted(unique_brands)  # Ordenar las marcas alfabéticamente
-    # Crear columnas para el selectbox
-    col_selectbox = st.columns(5)  # Puedes ajustar el número de columnas según sea necesario
-    with col_selectbox[0]:
-        selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
-    
-    # Si se selecciona una marca, filtrar también por esa marca
-    if selected_brand != "Todas":
-        filtered_df = filtered_df[filtered_df['Marca'] == selected_brand]
+filtered_df = df_filter[st.session_state.selected_columns]
 
 
 # Mostrar el DataFrame filtrado
-st.write("DataFrame filtrado:")
-st.dataframe(filtered_df)
+with st.expander("DataFrame filtrado:"):
+    st.dataframe(filtered_df)
