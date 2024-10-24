@@ -315,28 +315,31 @@ print(df_merged['Limpio'][:10], df_merged['Costo en pesos'][:10], df_merged['Can
 # Resultado final
 df_merged
 
-# Inicializa el estado de la sesión si no existe
-if 'selected_columns' not in st.session_state:
-    # Aquí se especifican las columnas que deben estar seleccionadas por defecto
-    st.session_state.selected_columns = []  # Empieza vacío para que todas estén destildadas
 
-# Título de la aplicación
-st.title("Seleccionar columnas para visualizar")
+with st.expander("Filtro de columnas"):
+    # Inicializa el estado de la sesión si no existe
+    if 'selected_columns' not in st.session_state:
+        # Aquí se especifican las columnas que deben estar seleccionadas por defecto
+        st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp"]  # Empieza vacío para que todas estén destildadas
 
-# Número de columnas en la interfaz
-num_columns = 5
-columns = st.columns(num_columns)  # Crear las columnas para los checkboxes
+    # Título de la aplicación
+    st.subheader("Seleccionar las columnas a visualizar")
 
-# Crear checkboxes para cada columna
-for i, column in enumerate(df_merged.columns):
-    with columns[i % num_columns]:  # Colocar el checkbox en la columna correspondiente
-        checked = column in st.session_state.selected_columns
-        if st.checkbox(column, value=checked):
-            if column not in st.session_state.selected_columns:
-                st.session_state.selected_columns.append(column)
-        else:
-            if column in st.session_state.selected_columns:
-                st.session_state.selected_columns.remove(column)
+    # Número de columnas en la interfaz
+    num_columns = 5
+    columns = st.columns(num_columns)  # Crear las columnas para los checkboxes
+
+
+    # Crear checkboxes para cada columna
+    for i, column in enumerate(df_merged.columns):
+        with columns[i % num_columns]:  # Colocar el checkbox en la columna correspondiente
+            checked = column in st.session_state.selected_columns
+            if st.checkbox(column, value=checked):
+                if column not in st.session_state.selected_columns:
+                    st.session_state.selected_columns.append(column)
+            else:
+                if column in st.session_state.selected_columns:
+                    st.session_state.selected_columns.remove(column)
 
 # Filtrar el DataFrame según las columnas seleccionadas
 filtered_df = df_merged[st.session_state.selected_columns]
@@ -346,7 +349,10 @@ filtered_df = df_merged[st.session_state.selected_columns]
 if 'Marca' in st.session_state.selected_columns:  # Verificar si 'Marca' está seleccionada
     unique_brands = df_merged['Marca'].unique()  # Obtener marcas únicas del DataFrame filtrado
     sorted_brands = sorted(unique_brands)  # Ordenar las marcas alfabéticamente
-    selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
+    # Crear columnas para el selectbox
+    col_selectbox = st.columns(5)  # Puedes ajustar el número de columnas según sea necesario
+    with col_selectbox[0]:
+        selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
     
     # Si se selecciona una marca, filtrar también por esa marca
     if selected_brand != "Todas":
