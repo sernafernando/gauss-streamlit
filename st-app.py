@@ -338,16 +338,20 @@ for i, column in enumerate(df_merged.columns):
             if column in st.session_state.selected_columns:
                 st.session_state.selected_columns.remove(column)
 
-# Filtro por 'Marca'
-unique_brands = df_merged['Marca'].unique()  # Obtener marcas únicas
-selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + list(unique_brands))
-
 # Filtrar el DataFrame según las columnas seleccionadas
 filtered_df = df_merged[st.session_state.selected_columns]
 
-# Si se selecciona una marca, filtrar también por esa marca
-if selected_brand != "Todas":
-    filtered_df = filtered_df[filtered_df['Marca'] == selected_brand]
+
+# Filtro por 'Marca' en el DataFrame filtrado
+if 'Marca' in st.session_state.selected_columns:  # Verificar si 'Marca' está seleccionada
+    unique_brands = df_merged['Marca'].unique()  # Obtener marcas únicas del DataFrame filtrado
+    sorted_brands = sorted(unique_brands)  # Ordenar las marcas alfabéticamente
+    selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
+    
+    # Si se selecciona una marca, filtrar también por esa marca
+    if selected_brand != "Todas":
+        filtered_df = filtered_df[filtered_df['Marca'] == selected_brand]
+
 
 # Mostrar el DataFrame filtrado
 st.write("DataFrame filtrado:")
