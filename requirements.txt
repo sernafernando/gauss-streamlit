@@ -1,2 +1,6 @@
-requests lxml re dateutil.relativedelta pandas streamlit datetime 
-locale numpy
+requests
+lxml
+pandas
+streamlit
+python-dateutil
+numpy
