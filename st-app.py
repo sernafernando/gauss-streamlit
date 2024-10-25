@@ -248,15 +248,15 @@ df_merged.drop(columns=['group'], inplace=True)
 
 # Datos de precios
 data_prices = {
-    'pricelist': [4, 5, 17, 14, 6, 13, 9, 10, 11, 15, 16],
-    1: [15.5, None, 23.9, 29.5, 29.35, 33.5, None, 13.2, 18.8, 18.65, 22.8],
-    2: [12.15, None, 20.55, 26.15, 26, 30.15, None, 13.2, 18.8, 18.65, 22.8],
-    3: [12.65, None, 21.05, 26.65, 26.5, 30.65, None, 13.2, 18.8, 18.65, 22.8],
-    4: [13.65, None, 22.05, 27.65, 27.5, 31.65, None, 13.2, 18.8, 18.65, 22.8],
-    5: [14, None, 22.4, 28, 27.85, 32, None, 13.2, 18.8, 18.65, 22.8],
-    6: [14.5, None, 22.9, 28.5, 28.35, 32.5, None, 13.2, 18.8, 18.65, 22.8],
-    7: [15, None, 23.4, 29, 28.85, 33, None, 13.2, 18.8, 18.65, 22.8],
-    8: [16, None, 24.4, 30, 29.85, 34, None, 13.2, 18.8, 18.65, 22.8]
+    'pricelist': [4, 5, 17, 14, 6, 13, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22],
+    1: [15.5, None, 24.4, 30.4, 35.4, 41, None, 4.83, 13.73, 19.73, 24.73, 15.5, 24.4, 30.4, 35.4, 41, 30.33],
+    2: [12.15, None, 21.05, 27.05, 32.55, 37.65, None, 4.83, 13.73, 19.73, 24.73, 12.15, 21.05, 27.05, 32.55, 37.65, 30.33],
+    3: [12.65, None, 21.55, 27.55, 32.55, 38.15, None, 4.83, 13.73, 19.73, 24.73, 12.65, 21.55, 27.55, 32.55, 38.15, 30.33],
+    4: [13.65, None, 22.55, 28.55, 33.55, 39.15, None, 4.83, 13.73, 19.73, 24.73, 13.65, 22.55, 28.55, 33.55, 39.15, 30.33],
+    5: [14, None, 22.9, 28.9, 33.9, 39.5, None, 4.83, 13.73, 19.73, 24.73, 14, 22.9, 28.9, 33.9, 39.5, 30.33],
+    6: [14.5, None, 23.4, 29.4, 34.4, 40, None, 4.83, 13.73, 19.73, 24.73, 14.5, 23.4, 29.4, 34.4, 40, 30.33],
+    7: [15, None, 23.9, 29.9, 34.9, 40.5, None, 4.83, 13.73, 19.73, 24.73, 15, 23.9, 29.9, 34.9, 40.5, 30.33],
+    8: [16, None, 24.9, 30.9, 35.9, 41.5, None, 4.83, 13.73, 19.73, 24.73, 16, 24.9, 30.9, 35.9, 41.5, 30.33]
 }
 
 # Crear DataFrame de precios
@@ -323,7 +323,7 @@ def markupear(row):
     return ((row['Limpio'] / row['costo_total_iva']) - 1) * 100
 
 def calcular_flex(df):
-    total_operaciones = df['Limpio'].count()
+    total_operaciones = df[df['Fecha'].notna()]['Limpio'].count()
     total_flex =    df[(df['ML_logistic_type'] == 'self_service') & (df['Fecha'].notna())]['Limpio'].count()
     total_colecta = df[(df['ML_logistic_type'] == 'cross_docking') & (df['Fecha'].notna())]['Limpio'].count()
     total_retiros = df[(df['ML_logistic_type'].isnull()) & (df['Fecha'].notna())]['Limpio'].count()
@@ -418,11 +418,13 @@ display_envios(df_merged)
 
 # Visualización del contenido
 
+with st.expander("DataFrame periodo:"):
+    st.dataframe(df_merged)
+
 # Línea separadora
 st.markdown("---")
 
-# Resultado final
-#df_merged
+
 
 # Copia de df_merged
 df_filter = df_merged.copy()
