@@ -290,7 +290,7 @@ df_merged['Comisión en pesos'] = np.where(
 
 df_merged['Costo envío'] = np.where(
     df_merged['ML_logistic_type'] == 'self_service',
-    df_merged['MLShippmentCost4Seller'], df_merged['MLShippmentCost4Seller']
+    df_merged['mlp_price4FreeShipping'], df_merged['mlp_price4FreeShipping']
 )
 
 def limpiar(row):
@@ -322,10 +322,37 @@ def markupear(row):
         return None  # O un valor adecuado que prefieras
     return ((row['Limpio'] / row['costo_total_iva']) - 1) * 100
 
+def calcular_flex(df):
+    total_operaciones = df['Limpio'].count()
+    total_flex =    df[(df['ML_logistic_type'] == 'self_service') & (df['Fecha'].notna())]['Limpio'].count()
+    total_colecta = df[(df['ML_logistic_type'] == 'cross_docking') & (df['Fecha'].notna())]['Limpio'].count()
+    total_retiros = df[(df['ML_logistic_type'].isnull()) & (df['Fecha'].notna())]['Limpio'].count()
+    total_full = df[(df['ML_logistic_type'] == 'fulfillment') & (df['Fecha'].notna())]['Limpio'].count()
+    porcentaje_flex = (total_flex / total_operaciones) * 100
+    porcentaje_colecta = (total_colecta / total_operaciones) * 100  
+    porcentaje_retiros = (total_retiros / total_operaciones) * 100
+    porcentaje_full = (total_full / total_operaciones) * 100
+    return total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full
+
+
 # Aplicamos la función y formateamos el resultado.
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
 df_merged['MarkUp'] = df_merged['MarkUp'].apply(lambda x: f"{x:.2f}%")
 
+# Definimos la variable para calcular los delta
+#def calcular_delta(df,title,last_day,day_before):
+#    if title == "MarkUp":
+#        current_value = (df[df['Fecha'] == last_day]['Limpio'].sum() / df[df['Fecha'] == last_day]['costo_total_iva'].sum())-1
+#        previous_value = (df[df['Fecha'] == day_before]['Limpio'].sum() / df[df['Fecha'] == day_before]['costo_total_iva'].sum())-1
+#        delta = current_value - previous_value
+#        delta_percent = (delta / previous_value) * 100 if previous_value != 0 else 0
+#        return delta, delta_percent
+#    current_value = df[df['Fecha'] == last_day][title].sum()
+#    previous_value = df[df['Fecha'] == day_before][title].sum()
+#    delta = current_value - previous_value
+#    delta_percent = (delta / previous_value) * 100 if previous_value != 0 else 0
+#    return delta, delta_percent
+    
 
 # Main Page
 
@@ -342,16 +369,18 @@ else:
 # Teoricamente hacemos gráficos con esto
 # Definir las métricas a mostrar
 # Formatear los totales
-total_limpio = df_merged['Limpio'].sum()
-total_costo = df_merged['costo_total_iva'].sum()
-total_comision = df_merged['Comisión en pesos'].sum()
+total_limpio = df_merged[df_merged['Fecha'].notna()]['Limpio'].sum()
+total_costo = df_merged[df_merged['Fecha'].notna()]['costo_total_iva'].sum()
+total_ventas_ml = df_merged[df_merged['Fecha'].notna()]['Monto_Total'].sum()
+total_comision = df_merged[df_merged['Fecha'].notna()]['Comisión en pesos'].sum()
 total_markup = ((total_limpio / total_costo)-1)*100
+total_ganancia = total_limpio - total_costo
 
 totales = {
-    "Total Limpio": f"{total_limpio:.2f}",
-    "Total Costo": f"{total_costo:.2f}",
-    "Total Comisión": f"{total_comision:.2f}",
-    "Total Markup": f"{total_markup:.2f}%"
+    "Total Ventas ML": f"$ {total_ventas_ml:,.0f}".replace(',', '.'),
+    "Total Limpio": f"$ {total_limpio:,.0f}".replace(',', '.'),
+    "Total Ganancia": f"$ {total_ganancia:,.0f}".replace(',', '.'),
+    "Total Markup": f"{total_markup:,.2f}%".replace(',', '.')
 }
 
 # Crear gráficos para los totales
@@ -363,9 +392,29 @@ def display_totals(totales):
                     st.metric(title, value)  # Muestra la métrica
             #   st.bar_chart([total_limpio, total_costo, total_comision], use_container_width=True)  # Gráfico de barras
 
+def display_envios(df):
+    total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full = calcular_flex(df)
+    total_operaciones_dict = {
+        "Total Operaciones": f"{total_operaciones:,.0f}".replace(',', '.'),
+        "Total Flex": f"{total_flex:,.0f}".replace(',', '.'),
+        "Total Colecta": f"{total_colecta:,.0f}".replace(',', '.'),
+        "Total Retiros": f"{total_retiros:,.0f}".replace(',', '.'),
+        "Total Full": f"{total_full:,.0f}".replace(',', '.'),
+        "Porcentaje Flex": f"{porcentaje_flex:.2f}%".replace(',', '.'),
+        "Porcentaje Colecta": f"{porcentaje_colecta:.2f}%".replace(',', '.'),
+        "Porcentaje Retiros": f"{porcentaje_retiros:.2f}%".replace(',', '.'),
+        "Porcentaje Full": f"{porcentaje_full:.2f}%".replace(',', '.')
+    }
+    cols = st.columns(len(total_operaciones_dict))
+    for col, (title, value) in zip(cols, total_operaciones_dict.items()):
+        with col:
+            with st.container(border=True):
+                st.metric(title, value)
+
 # Mostrar totales en la aplicación
 st.subheader("Total periodo")
 display_totals(totales)
+display_envios(df_merged)
 
 # Visualización del contenido
 
@@ -393,6 +442,7 @@ with col_selectbox[0]:
 df_filter = df_merged.copy()
 if selected_brand != "Todas":
     df_filter = df_filter[df_filter['Marca'] == selected_brand]
+        
 
 
 # Crear dos entradas de fecha
@@ -400,39 +450,81 @@ with col_selectbox[1]:
     start_date = st.date_input("Fecha inicial:", value=df_merged['Fecha'].min())
 
 with col_selectbox[2]:
-    end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max())
+    end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max() + timedelta(days=1))
 
 # Filtrar el DataFrame en base a las fechas seleccionadas
 df_filter = df_filter[(df_filter['Fecha'] >= pd.to_datetime(start_date)) & 
                       (df_filter['Fecha'] <= pd.to_datetime(end_date))]
 
+
 filtro_monto_total = df_filter['Monto_Total'].sum()
+
+last_day = df_filter['Fecha'].max() + timedelta(days=1)
+day_before = last_day - pd.Timedelta(days=1)  # Obtener la fecha de ayer
+
 
 # Formatear los totales
 total_limpio_filtered = df_filter['Limpio'].sum()
 total_costo_filtered = df_filter['costo_total_iva'].sum()
 total_comision_filtered = df_filter['Comisión en pesos'].sum()
-total_markup_filtered = ((total_limpio_filtered / total_costo_filtered)-1)*100
+total_markup_filtered = ((total_limpio_filtered / total_costo_filtered) - 1) * 100
+total_venta_ml_filtered = df_filter['Monto_Total'].sum()
+total_ganancia_filtered = total_limpio_filtered - total_costo_filtered
+
+
 
 totales_filtered = {
-    "Total Limpio": f"{total_limpio_filtered:.2f}",
-    "Total Costo": f"{total_costo_filtered:.2f}",
-    "Total Comisión": f"{total_comision_filtered:.2f}",
-    "Total Markup": f"{total_markup_filtered:.2f}%"
+    "Total Ventas ML": f"$ {total_venta_ml_filtered:,.0f}".replace(',', '.'),
+    "Total Limpio": f"$ {total_limpio_filtered:,.0f}".replace(',', '.'),
+    "Total Ganancia": f"$ {total_ganancia_filtered:,.0f}".replace(',', '.'),
+    "Total Markup": f"{total_markup_filtered:+.2f}%".replace(',', '.'),
 }
 
 # Crear gráficos para los totales
-def display_totals_filtered(totales):
+def display_totals_filtered(totales, last_day=last_day, day_before=day_before):
     cols = st.columns(len(totales))
     for col, (title, value) in zip(cols, totales.items()):
         with col:
             with st.container(border=True):
-                    st.metric(title, value)  # Muestra la métrica
-            #   st.bar_chart([total_limpio, total_costo, total_comision], use_container_width=True)  # Gráfico de barras
+                #if title == "Total Markup":
+                #    columna = 'MarkUp'
+                #    delta, delta_percent = calcular_delta(df_filter, columna, last_day, day_before)
+                #    st.metric(title, value, delta=f"{delta:+,.0f} ({delta_percent:+.2f}%))" , delta_color="inverse")
+                #else:
+                #    # Calcular delta
+                #    if title == "Total Ventas ML":
+                #        columna = 'Monto_Total'
+                #    elif title == "Total Limpio":
+                #        columna = 'Limpio'
+                #    elif title == "Total Ganancia":
+                #        columna = 'costo_total_iva'
+                #    delta, delta_percent = calcular_delta(df_filter, columna, last_day, day_before)
+                #    delta_color = "inverse" if delta < 0 else "normal"
+                #    st.metric(title, value, delta=f"vs. día anterior: $ {delta:+,.0f} ($ {delta_percent:+.2f}))",delta_color=delta_color)  # Muestra la métrica con delta
+                st.metric(title, value)
+def display_envios_filtered(df):
+    total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full = calcular_flex(df)
+    total_operaciones_dict = {
+        "Total Operaciones": f"{total_operaciones:,.0f}".replace(',', '.'),
+        "Total Flex": f"{total_flex:,.0f}".replace(',', '.'),
+        "Total Colecta": f"{total_colecta:,.0f}".replace(',', '.'),
+        "Total Retiros": f"{total_retiros:,.0f}".replace(',', '.'),
+        "Total Full": f"{total_full:,.0f}".replace(',', '.'),
+        "Porcentaje Flex": f"{porcentaje_flex:.2f}%".replace(',', '.'),
+        "Porcentaje Colecta": f"{porcentaje_colecta:.2f}%".replace(',', '.'),
+        "Porcentaje Retiros": f"{porcentaje_retiros:.2f}%".replace(',', '.'),
+        "Porcentaje Full": f"{porcentaje_full:.2f}%".replace(',', '.')
+    }
+    cols = st.columns(len(total_operaciones_dict))
+    for col, (title, value) in zip(cols, total_operaciones_dict.items()):
+        with col:
+            with st.container(border=True):
+                st.metric(title, value)
 
 # Mostrar totales en la aplicación
 st.subheader("Total filtro")
-display_totals(totales_filtered)
+display_totals_filtered(totales_filtered)
+display_envios_filtered(df_filter)
 
 # Línea separadora
 st.markdown("---")
