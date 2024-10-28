@@ -11,6 +11,9 @@ from datetime import datetime, timedelta
 import locale
 import numpy as np
 import io
+import matplotlib.pyplot as plt
+import plotly.express as px
+
 
 # Set page config
 st.set_page_config(page_title="Gauss Online Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
@@ -59,6 +62,9 @@ with st.sidebar:
         varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=7)
         from_date = st.date_input("Escriba fecha de inicio", value=from_date)
         to_date = st.date_input("Escriba fecha de fin", value=to_date)
+
+    if st.button("Actualizar datos"):
+        fetch_data_and_create_df.clear()  # Borra la caché de la función
 
 
 
@@ -131,7 +137,20 @@ class LargeXMLHandler(xml.sax.ContentHandler):
         if self.is_in_result:
             self.result_content.append(content)
 
-def dashboard():
+authenticate()
+# Utilizar @st.cache_resource para almacenar en caché la respuesta de la API
+@st.cache_resource(ttl=3600)  # Puedes ajustar el tiempo de vida en segundos
+# Clase para manejar el contenido del XML grande
+class LargeXMLHandler(xml.sax.ContentHandler):
+    def __init__(self):
+        self.result_content = []
+        
+    def characters(self, content):
+        self.result_content.append(content)
+
+# Almacena en caché la función que obtiene los datos y crea el DataFrame
+@st.cache_resource(ttl=3600)
+def fetch_data_and_create_df():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
@@ -150,48 +169,51 @@ def dashboard():
             </wsGBPScriptExecute4Dataset>
         </soap:Body>
     </soap:Envelope>'''
-    
+
     header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
     response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
 
     if response.status_code != 200:
-        print(f"Error en la solicitud: {response.status_code}")
-        return
+        st.error(f"Error en la solicitud: {response.status_code}")
+        return pd.DataFrame()
 
-    print("Consulta a la API exitosa")
-    
-    # Creamos el parser y el manejador
+    # Crear y parsear el XML
     parser = xml.sax.make_parser()
     handler = LargeXMLHandler()
     parser.setContentHandler(handler)
     
-    # Parseamos el XML
     xml_content = response.content
     xml.sax.parseString(xml_content, handler)
 
-    # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
+    # Extraer el JSON de <Column1>
     result_content = ''.join(handler.result_content)
-
-    # Procesar el JSON que está dentro de <Column1>
     unescaped_result = html.unescape(result_content)
     match = re.search(r'\[.*?\]', unescaped_result)
     
     if match:
         column1_json = match.group(0)
     else:
-        print("No se encontró contenido JSON en Column1.")
-        return
+        st.error("No se encontró contenido JSON en Column1.")
+        return pd.DataFrame()
 
     try:
         column1_list = json.loads(column1_json)
+        df = pd.DataFrame(column1_list)
+        return df
     except json.JSONDecodeError as e:
-        print(f"Error al decodificar el JSON: {e}")
+        st.error(f"Error al decodificar el JSON: {e}")
+        return pd.DataFrame()
 
-    global df
-    df = pd.DataFrame(column1_list)
+# Llamada a la función en el dashboard
+df = fetch_data_and_create_df()
 
-authenticate()
-dashboard()
+#if not df.empty:
+#    st.write(df)
+#else:
+#    st.warning("No se cargaron datos en el DataFrame.")
+
+
+#dashboard()
 
 
 columnas_sin_comas = ['ID_de_Operación','ML_id', 'subcat_id']  # Nombres de las keys/columnas del DataFrame
@@ -203,7 +225,7 @@ for column in columnas_sin_comas:
 
 # Formatear fecha a formato dd/mm/aaaa hh:mm:ss
 # Convertir la columna de fechas, manejando fechas con o sin microsegundos
-df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
+df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce',dayfirst=True)
 
 # Formatear las fechas en un formato más legible
 df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
@@ -563,3 +585,25 @@ filtered_df = df_filter[st.session_state.selected_columns]
 # Mostrar el DataFrame filtrado
 with st.expander("DataFrame filtrado:"):
     st.dataframe(filtered_df)
+
+def prueba_torta(df):
+    total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full = calcular_flex(df)
+    total_operaciones_dict = {
+        "Total Flex": total_flex,
+        "Total Colecta": total_colecta,
+        "Total Retiros": total_retiros,
+        "Total Full": total_full
+    }
+    # Convertir el diccionario en listas para Matplotlib
+    labels = list(total_operaciones_dict.keys())
+    sizes = list(total_operaciones_dict.values())
+
+    # Crear el gráfico de torta
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')  # Hace que el gráfico sea un círculo
+
+    # Mostrar en Streamlit
+    st.pyplot(fig)
+
+prueba_torta(df_filter)
