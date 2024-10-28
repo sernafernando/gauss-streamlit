@@ -207,6 +207,9 @@ def fetch_data_and_create_df():
 # Llamada a la función en el dashboard
 df = fetch_data_and_create_df()
 
+if 'data'not in st.session_state:
+    st.session_state.data = df
+
 #if not df.empty:
 #    st.write(df)
 #else:
@@ -361,6 +364,52 @@ def calcular_flex(df):
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
 df_merged['MarkUp'] = df_merged['MarkUp'].apply(lambda x: f"{x:.2f}%")
 
+def prueba_torta(df):
+    # Calcular los totales y porcentajes
+    total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full = calcular_flex(df)
+    
+    # Crear diccionario de valores
+    total_operaciones_dict = {
+        "Total Flex": total_flex,
+        "Total Colecta": total_colecta,
+        "Total Retiros": total_retiros,
+        "Total Full": total_full
+    }
+    
+    # Preparar datos para el gráfico
+    labels = list(total_operaciones_dict.keys())
+    sizes = list(total_operaciones_dict.values())
+    
+    # Calcular porcentajes
+    total = sum(sizes)
+    porcentajes = [size / total * 100 for size in sizes]
+
+    # Crear una lista de etiquetas con valores y porcentajes
+    labels_with_values = [f"{label} ({size} - {pct:.1f}%)" for label, size, pct in zip(labels, sizes, porcentajes)]
+
+    colors =  plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(total_operaciones_dict))) # Colores personalizados
+    explode = (0, 0, 0, 0)  # Destacar el primer sector
+
+    # Crear el gráfico de torta
+    fig, ax = plt.subplots(facecolor='none')  # Fondo de la figura transparente
+    ax.set_facecolor('none')  # Fondo del eje transparente
+
+    # Crear el gráfico de torta
+    wedges, texts = ax.pie(
+        sizes, labels=None, startangle=90,
+        colors=colors, explode=explode, pctdistance=0.85
+    )
+    ax.axis('equal')  # Hace que el gráfico sea un círculo
+
+    # Añadir título
+    #ax.set_title("Distribución de Operaciones", fontsize=14)
+
+    # Agregar leyenda con valores y porcentajes
+    ax.legend(wedges, labels_with_values, title=f"Operaciones: {total_operaciones}",  loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2)
+
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)
+
 # Definimos la variable para calcular los delta
 #def calcular_delta(df,title,last_day,day_before):
 #    if title == "MarkUp":
@@ -434,9 +483,21 @@ def display_envios(df):
                 st.metric(title, value)
 
 # Mostrar totales en la aplicación
-st.subheader("Total periodo")
-display_totals(totales)
-display_envios(df_merged)
+#st.subheader("Total periodo")
+#display_totals(totales)
+#display_envios(df_merged)
+
+col_under_envios = st.columns(3)
+
+with col_under_envios[0]:
+    st.markdown("#### Total Periodo:")
+    with st.container(border=True):
+        st.metric("Total Ventas ML", f"$ {total_ventas_ml:,.0f}".replace(',', '.'))  # Muestra el total_ventas_ml
+        st.metric("Total Limpio", f"$ {total_limpio:,.0f}".replace(',', '.'))  # Muestra el total_limpio
+        st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
+        st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
+with col_under_envios[1]:
+    prueba_torta(df_merged)
 
 # Visualización del contenido
 
@@ -461,6 +522,7 @@ col_selectbox = st.columns(5)
 
 with col_selectbox[0]:
     selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
+    
 
 # Filtrar por marca seleccionada
 df_filter = df_merged.copy()
@@ -468,10 +530,10 @@ if selected_brand != "Todas":
     df_filter = df_filter[df_filter['Marca'] == selected_brand]
         
 
-
 # Crear dos entradas de fecha
 with col_selectbox[1]:
     start_date = st.date_input("Fecha inicial:", value=df_merged['Fecha'].min())
+    
 
 with col_selectbox[2]:
     end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max() + timedelta(days=1))
@@ -503,6 +565,8 @@ totales_filtered = {
     "Total Ganancia": f"$ {total_ganancia_filtered:,.0f}".replace(',', '.'),
     "Total Markup": f"{total_markup_filtered:+.2f}%".replace(',', '.'),
 }
+
+
 
 # Crear gráficos para los totales
 def display_totals_filtered(totales, last_day=last_day, day_before=day_before):
@@ -546,12 +610,26 @@ def display_envios_filtered(df):
                 st.metric(title, value)
 
 # Mostrar totales en la aplicación
-st.subheader("Total filtro")
-display_totals_filtered(totales_filtered)
-display_envios_filtered(df_filter)
+#st.subheader("Total filtro")
+#display_totals_filtered(totales_filtered)
+#display_envios_filtered(df_filter)
+
+col_under_flex = st.columns(3)
+
+with col_under_flex[0]:
+    st.markdown("#### Total Filtrado:")
+    with st.container(border=True):
+        st.metric("Total Ventas ML", f"$ {total_venta_ml_filtered:,.0f}".replace(',', '.'))  # Muestra el total_ventas_ml
+        st.metric("Total Limpio", f"$ {total_limpio_filtered:,.0f}".replace(',', '.'))  # Muestra el total_limpio
+        st.metric("Total Ganancia", f"$ {total_ganancia_filtered:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
+        st.metric("Total Markup", f"{total_markup_filtered:,.2f}%".replace(',', '.'))  # Muestra el total_markup
+
+with col_under_flex[1]:
+    prueba_torta(df_filter)
 
 # Línea separadora
 st.markdown("---")
+
 
 with st.expander("Filtro de columnas"):
     # Inicializa el estado de la sesión si no existe
@@ -582,28 +660,8 @@ with st.expander("Filtro de columnas"):
 filtered_df = df_filter[st.session_state.selected_columns]
 
 
+
 # Mostrar el DataFrame filtrado
 with st.expander("DataFrame filtrado:"):
     st.dataframe(filtered_df)
 
-def prueba_torta(df):
-    total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full = calcular_flex(df)
-    total_operaciones_dict = {
-        "Total Flex": total_flex,
-        "Total Colecta": total_colecta,
-        "Total Retiros": total_retiros,
-        "Total Full": total_full
-    }
-    # Convertir el diccionario en listas para Matplotlib
-    labels = list(total_operaciones_dict.keys())
-    sizes = list(total_operaciones_dict.values())
-
-    # Crear el gráfico de torta
-    fig, ax = plt.subplots()
-    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')  # Hace que el gráfico sea un círculo
-
-    # Mostrar en Streamlit
-    st.pyplot(fig)
-
-prueba_torta(df_filter)
