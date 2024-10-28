@@ -400,12 +400,53 @@ def display_top_10_subcategorias(df):
 
     # Renombrar la columna 'Monto_Total' a 'Facturación ML'
     top_10_marcas = top_10_marcas.rename(columns={'Monto_Total': 'Facturación ML'})
-
+    
     # Crear el gráfico
     fig = px.bar(top_10_marcas, x='SubCategoría', y='Facturación ML',
              title='Top 10 SubCategoría por Facturación')
     
     st.plotly_chart(fig)
+
+def display_top_10_productos(df):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby('Descripción', as_index=False)['Monto_Total'].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10_productos = df_grouped.nlargest(10, 'Monto_Total')
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10_productos = top_10_productos.rename(columns={'Monto_Total': 'Facturación ML','Descripción': 'Producto'})
+
+    # Truncar los nombres de productos largos
+    top_10_productos['Producto'] = top_10_productos['Producto'].apply(lambda x: x[:25] + '...' if len(x) > 25 else x)
+
+
+    # Crear el gráfico
+    fig = px.bar(top_10_productos, x='Producto', y='Facturación ML',
+             title='Top 10 Producto por Facturación')
+    
+    st.plotly_chart(fig)
+
+def display_top_10_gen(df, col1, col2, label1, label2):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby(col1, as_index=False)[col2].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10 = df_grouped.nlargest(10, col2)
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10 = top_10.rename(columns={col2: label2,col1: label1})
+
+    # Truncar los nombres de productos largos
+    top_10[label1] = top_10[label1].apply(lambda x: x[:25] + '...' if len(x) > 25 else x)
+
+
+    # Crear el gráfico
+    fig = px.bar(top_10, x=label1, y=label2,
+             title=f'Top 10 {label1} por {label2}')
+    
+    st.plotly_chart(fig)
+
 
 # Aplicamos la función y formateamos el resultado.
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
@@ -547,13 +588,23 @@ with col_under_envios[1]:
     prueba_torta(df_merged)
 
 with col_under_envios[2]:
-    seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
+    seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación", "Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
     if seleccionar_grafico == "Top 10 SubCategoría por Facturación":
         display_top_10_subcategorias(df_merged)
     elif seleccionar_grafico == "Top 10 Categoría por Facturación":
         display_top_10_categorias(df_merged)
     elif seleccionar_grafico == "Top 10 Marcas por Facturación":
         display_top_10_marcas(df_merged)
+    elif seleccionar_grafico == "Top 10 Productos por Facturación":
+        display_top_10_productos(df_merged)
+    elif seleccionar_grafico == "Top 10 Marcas por Ventas":
+        display_top_10_gen(df_merged, 'Marca', 'Cantidad', 'Marca', 'Unidades Vendidas')
+    elif seleccionar_grafico == "Top 10 SubCategoría por Ventas":
+        display_top_10_gen(df_merged, 'SubCategoría', 'Cantidad', 'SubCategoría', 'Unidades Vendidas')    
+    elif seleccionar_grafico == "Top 10 Categoría por Ventas":
+        display_top_10_gen(df_merged, 'Categoría', 'Cantidad', 'Categoría', 'Unidades Vendidas')
+    elif seleccionar_grafico == "Top 10 Productos por Ventas":
+        display_top_10_gen(df_merged, 'Descripción', 'Cantidad', 'Producto', 'Unidades Vendidas')
 
 # Visualización del contenido
 
@@ -596,9 +647,9 @@ with col_selectbox[2]:
 
 with col_selectbox[4]:
     if selected_brand != "Todas":
-        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
+        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
     else:
-        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
+        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
 
 # Filtrar el DataFrame en base a las fechas seleccionadas
 df_filter = df_filter[(df_filter['Fecha'] >= pd.to_datetime(start_date)) & 
@@ -698,6 +749,16 @@ with col_under_flex[2]:
             display_top_10_categorias(df_filter)
         elif seleccionar_grafico_filtrado == "Top 10 Marcas por Facturación":
             display_top_10_marcas(df_filter)
+        elif seleccionar_grafico_filtrado == "Top 10 Productos por Facturación":
+            display_top_10_productos(df_filter)
+        elif seleccionar_grafico_filtrado == "Top 10 Marcas por Ventas":
+            display_top_10_gen(df_filter, 'Marca', 'Cantidad', 'Marca', 'Unidades Vendidas')
+        elif seleccionar_grafico_filtrado == "Top 10 SubCategoría por Ventas":
+            display_top_10_gen(df_filter, 'SubCategoría', 'Cantidad', 'SubCategoría', 'Unidades Vendidas')    
+        elif seleccionar_grafico_filtrado == "Top 10 Categoría por Ventas":
+            display_top_10_gen(df_filter, 'Categoría', 'Cantidad', 'Categoría', 'Unidades Vendidas')
+        elif seleccionar_grafico_filtrado == "Top 10 Productos por Ventas":
+            display_top_10_gen(df_filter, 'Descripción', 'Cantidad', 'Producto', 'Unidades Vendidas')
 
 # Línea separadora
 st.markdown("---")
