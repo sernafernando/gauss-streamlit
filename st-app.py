@@ -116,7 +116,6 @@ def authenticate():
         print("No se encontró el elemento AuthenticateUserResult") # Muestra el contenido del nodo si lo tiene
     
     return token
-
 class LargeXMLHandler(xml.sax.ContentHandler):
     def __init__(self):
         self.result_content = []
@@ -137,10 +136,8 @@ class LargeXMLHandler(xml.sax.ContentHandler):
         if self.is_in_result:
             self.result_content.append(content)
 
-authenticate()
-# Utilizar @st.cache_resource para almacenar en caché la respuesta de la API
-@st.cache_data(ttl=3600)
-def fetch_data():
+@st.cache_data
+def dashboard():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
@@ -160,54 +157,49 @@ def fetch_data():
         </soap:Body>
     </soap:Envelope>'''
     
-    headers = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
-    response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=headers)
+    header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
+    response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
 
     if response.status_code != 200:
-        st.error(f"Error en la solicitud: {response.status_code}")
-        return pd.DataFrame()
+        print(f"Error en la solicitud: {response.status_code}")
+        return
 
-    # Parsear la respuesta XML
-    namespaces = {
-        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
-        'microsoft': 'http://microsoft.com/webservices/'
-    }
+    print("Consulta a la API exitosa")
     
-    root = etree.fromstring(response.content)
-    result_node = root.xpath('//microsoft:wsGBPScriptExecute4DatasetResult', namespaces=namespaces)
+    # Creamos el parser y el manejador
+    parser = xml.sax.make_parser()
+    handler = LargeXMLHandler()
+    parser.setContentHandler(handler)
     
-    if not result_node:
-        st.error("No se encontró el nodo wsGBPScriptExecute4DatasetResult.")
-        return pd.DataFrame()
+    # Parseamos el XML
+    xml_content = response.content
+    xml.sax.parseString(xml_content, handler)
 
-    result_content = result_node[0].text
+    # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
+    result_content = ''.join(handler.result_content)
+
+    # Procesar el JSON que está dentro de <Column1>
     unescaped_result = html.unescape(result_content)
-    
     match = re.search(r'\[.*?\]', unescaped_result)
+    
     if match:
         column1_json = match.group(0)
     else:
-        st.error("No se encontró contenido JSON en Column1.")
-        return pd.DataFrame()
+        print("No se encontró contenido JSON en Column1.")
+        return
 
     try:
         column1_list = json.loads(column1_json)
-        return pd.DataFrame(column1_list)
     except json.JSONDecodeError as e:
-        st.error(f"Error al decodificar el JSON: {e}")
-        return pd.DataFrame()
+        print(f"Error al decodificar el JSON: {e}")
 
-def dashboard():
-    global df
-    df = fetch_data()
-    if df.empty:
-        st.warning("No se obtuvieron datos.")
+    
+    df = pd.DataFrame(column1_list)
+    return df
 
-# Llamada a la función en el dashboard
-dashboard()
+authenticate()
 
-if 'data'not in st.session_state:
-    st.session_state.data = df
+df = dashboard()
 
 #if not df.empty:
 #    st.write(df)
@@ -215,7 +207,6 @@ if 'data'not in st.session_state:
 #    st.warning("No se cargaron datos en el DataFrame.")
 
 
-#dashboard()
 
 
 columnas_sin_comas = ['ID_de_Operación','ML_id', 'subcat_id']  # Nombres de las keys/columnas del DataFrame
