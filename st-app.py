@@ -64,7 +64,7 @@ with st.sidebar:
         to_date = st.date_input("Escriba fecha de fin", value=to_date)
 
     if st.button("Actualizar datos"):
-        fetch_data_and_create_df.clear()  # Borra la caché de la función
+        st.cache_data.clear()  # Borra la caché de la función
 
 
 
@@ -139,18 +139,8 @@ class LargeXMLHandler(xml.sax.ContentHandler):
 
 authenticate()
 # Utilizar @st.cache_resource para almacenar en caché la respuesta de la API
-@st.cache_resource(ttl=3600)  # Puedes ajustar el tiempo de vida en segundos
-# Clase para manejar el contenido del XML grande
-class LargeXMLHandler(xml.sax.ContentHandler):
-    def __init__(self):
-        self.result_content = []
-        
-    def characters(self, content):
-        self.result_content.append(content)
-
-# Almacena en caché la función que obtiene los datos y crea el DataFrame
-@st.cache_resource(ttl=3600)
-def fetch_data_and_create_df():
+@st.cache_data(ttl=3600)
+def fetch_data():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
@@ -169,27 +159,31 @@ def fetch_data_and_create_df():
             </wsGBPScriptExecute4Dataset>
         </soap:Body>
     </soap:Envelope>'''
-
-    header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
-    response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
+    
+    headers = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
+    response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=headers)
 
     if response.status_code != 200:
         st.error(f"Error en la solicitud: {response.status_code}")
         return pd.DataFrame()
 
-    # Crear y parsear el XML
-    parser = xml.sax.make_parser()
-    handler = LargeXMLHandler()
-    parser.setContentHandler(handler)
+    # Parsear la respuesta XML
+    namespaces = {
+        'soap': 'http://schemas.xmlsoap.org/soap/envelope/',
+        'microsoft': 'http://microsoft.com/webservices/'
+    }
     
-    xml_content = response.content
-    xml.sax.parseString(xml_content, handler)
+    root = etree.fromstring(response.content)
+    result_node = root.xpath('//microsoft:wsGBPScriptExecute4DatasetResult', namespaces=namespaces)
+    
+    if not result_node:
+        st.error("No se encontró el nodo wsGBPScriptExecute4DatasetResult.")
+        return pd.DataFrame()
 
-    # Extraer el JSON de <Column1>
-    result_content = ''.join(handler.result_content)
+    result_content = result_node[0].text
     unescaped_result = html.unescape(result_content)
-    match = re.search(r'\[.*?\]', unescaped_result)
     
+    match = re.search(r'\[.*?\]', unescaped_result)
     if match:
         column1_json = match.group(0)
     else:
@@ -198,14 +192,19 @@ def fetch_data_and_create_df():
 
     try:
         column1_list = json.loads(column1_json)
-        df = pd.DataFrame(column1_list)
-        return df
+        return pd.DataFrame(column1_list)
     except json.JSONDecodeError as e:
         st.error(f"Error al decodificar el JSON: {e}")
         return pd.DataFrame()
 
+def dashboard():
+    global df
+    df = fetch_data()
+    if df.empty:
+        st.warning("No se obtuvieron datos.")
+
 # Llamada a la función en el dashboard
-df = fetch_data_and_create_df()
+dashboard()
 
 if 'data'not in st.session_state:
     st.session_state.data = df
@@ -228,7 +227,7 @@ for column in columnas_sin_comas:
 
 # Formatear fecha a formato dd/mm/aaaa hh:mm:ss
 # Convertir la columna de fechas, manejando fechas con o sin microsegundos
-df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce',dayfirst=True)
+df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
 
 # Formatear las fechas en un formato más legible
 df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
@@ -797,4 +796,3 @@ filtered_df = df_filter[st.session_state.selected_columns]
 # Mostrar el DataFrame filtrado
 with st.expander("DataFrame filtrado:"):
     st.dataframe(filtered_df)
-
