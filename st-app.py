@@ -359,6 +359,53 @@ def calcular_flex(df):
     porcentaje_full = (total_full / total_operaciones) * 100
     return total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full
 
+def display_top_10_marcas(df):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby('Marca', as_index=False)['Monto_Total'].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10_marcas = df_grouped.nlargest(10, 'Monto_Total')
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10_marcas = top_10_marcas.rename(columns={'Monto_Total': 'Facturación ML'})
+
+    # Crear el gráfico
+    fig = px.bar(top_10_marcas, x='Marca', y='Facturación ML',
+             title='Top 10 Marcas por Facturación')
+    
+    st.plotly_chart(fig)
+
+def display_top_10_categorias(df):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby('Categoría', as_index=False)['Monto_Total'].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10_marcas = df_grouped.nlargest(10, 'Monto_Total')
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10_marcas = top_10_marcas.rename(columns={'Monto_Total': 'Facturación ML'})
+
+    # Crear el gráfico
+    fig = px.bar(top_10_marcas, x='Categoría', y='Facturación ML',
+             title='Top 10 Categoría por Facturación')
+    
+    st.plotly_chart(fig)
+
+def display_top_10_subcategorias(df):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby('SubCategoría', as_index=False)['Monto_Total'].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10_marcas = df_grouped.nlargest(10, 'Monto_Total')
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10_marcas = top_10_marcas.rename(columns={'Monto_Total': 'Facturación ML'})
+
+    # Crear el gráfico
+    fig = px.bar(top_10_marcas, x='SubCategoría', y='Facturación ML',
+             title='Top 10 SubCategoría por Facturación')
+    
+    st.plotly_chart(fig)
 
 # Aplicamos la función y formateamos el resultado.
 df_merged['MarkUp'] = df_merged.apply(markupear, axis=1)
@@ -499,6 +546,15 @@ with col_under_envios[0]:
 with col_under_envios[1]:
     prueba_torta(df_merged)
 
+with col_under_envios[2]:
+    seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
+    if seleccionar_grafico == "Top 10 SubCategoría por Facturación":
+        display_top_10_subcategorias(df_merged)
+    elif seleccionar_grafico == "Top 10 Categoría por Facturación":
+        display_top_10_categorias(df_merged)
+    elif seleccionar_grafico == "Top 10 Marcas por Facturación":
+        display_top_10_marcas(df_merged)
+
 # Visualización del contenido
 
 with st.expander("DataFrame periodo:"):
@@ -537,6 +593,12 @@ with col_selectbox[1]:
 
 with col_selectbox[2]:
     end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max() + timedelta(days=1))
+
+with col_selectbox[4]:
+    if selected_brand != "Todas":
+        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
+    else:
+        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación"])
 
 # Filtrar el DataFrame en base a las fechas seleccionadas
 df_filter = df_filter[(df_filter['Fecha'] >= pd.to_datetime(start_date)) & 
@@ -616,6 +678,8 @@ def display_envios_filtered(df):
 
 col_under_flex = st.columns(3)
 
+
+
 with col_under_flex[0]:
     st.markdown("#### Total Filtrado:")
     with st.container(border=True):
@@ -626,6 +690,14 @@ with col_under_flex[0]:
 
 with col_under_flex[1]:
     prueba_torta(df_filter)
+
+with col_under_flex[2]:
+        if seleccionar_grafico_filtrado == "Top 10 SubCategoría por Facturación":
+            display_top_10_subcategorias(df_filter)
+        elif seleccionar_grafico_filtrado == "Top 10 Categoría por Facturación":
+            display_top_10_categorias(df_filter)
+        elif seleccionar_grafico_filtrado == "Top 10 Marcas por Facturación":
+            display_top_10_marcas(df_filter)
 
 # Línea separadora
 st.markdown("---")
