@@ -17,6 +17,8 @@ import plotly.express as px
 
 # Set page config
 st.set_page_config(page_title="Gauss Online Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
+
+
 # Establecer el locale para el formato deseado
 try:
     locale.setlocale(locale.LC_ALL, 'es_AR.UTF-8')
@@ -63,8 +65,16 @@ with st.sidebar:
         from_date = st.date_input("Escriba fecha de inicio", value=from_date)
         to_date = st.date_input("Escriba fecha de fin", value=to_date)
 
+    st.session_state["from_date"] = from_date
+    st.session_state["to_date"] = to_date
+
     if st.button("Actualizar datos"):
         st.cache_data.clear()  # Borra la caché de la función
+    
+    st.markdown("##### Seleccione la página:")
+    main_page = st.page_link("st_app.py",label="Dashboard",icon="🏠")
+    ventas_page = st.page_link("pages/02ventas_ml.py",label="Ventas ML",icon="📈")
+
 
 
 
@@ -111,7 +121,7 @@ def authenticate():
     if auth_result:
         global token
         token = auth_result[0].text
-        
+        st.session_state.token = token
     else:
         print("No se encontró el elemento AuthenticateUserResult") # Muestra el contenido del nodo si lo tiene
     
@@ -197,9 +207,11 @@ def dashboard():
     df = pd.DataFrame(column1_list)
     return df
 
+
 authenticate()
 
 df = dashboard()
+
 
 #if not df.empty:
 #    st.write(df)
@@ -509,9 +521,8 @@ col_header = st.columns(3)
 
 with col_header[0]:
     """
-    # Ventas ML
-    Consulta de Ventas ML
-
+    # Resumen de Ventas
+    
     """
 
 with col_overheader[2]:
