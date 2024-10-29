@@ -14,6 +14,7 @@ import io
 import matplotlib.pyplot as plt
 import plotly.express as px
 from st_app import LargeXMLHandler
+from pygwalker.api.streamlit import StreamlitRenderer
 
 # Set page config
 st.set_page_config(page_title="Gauss Online | Ventas ML", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
