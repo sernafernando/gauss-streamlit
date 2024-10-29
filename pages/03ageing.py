@@ -199,11 +199,11 @@ df_ageing_deactive = df_ageing_unique[(df_ageing_unique['Activa'] == False)]
 col_underheader = st.columns(3)
 
 with col_underheader[0]:
-    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días','#5b8cb2')
+    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días','#6b8eb2')
 with col_underheader[1]:
     top_10_gen(df_ageing_active, 'Descripción', 'Ageing', 'Producto', 'Ageing', 'Top 10 Productos Activos con mayor Ageing', '#99ccff')
 with col_underheader[2]:
-    top_10_gen(df_ageing_deactive, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', 'Top 10 Productos Pausados con mayor Stock','#5b8cb2')
+    top_10_gen(df_ageing_deactive, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', 'Top 10 Productos Pausados con mayor Stock','#6b8eb2')
 
 with st.expander("Ageing Activas"):
     df_ageing_active
