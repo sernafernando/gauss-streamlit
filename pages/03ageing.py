@@ -14,6 +14,7 @@ import io
 import matplotlib.pyplot as plt
 import plotly.express as px
 from st_app import LargeXMLHandler
+from pygwalker.api.streamlit import StreamlitRenderer
 
 # Set page config
 st.set_page_config(page_title="Gauss Online | Ageing", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
@@ -213,3 +214,14 @@ with st.expander("Ageing Pausadas"):
 
 with st.expander("Ageing completo"): 
     df_ageing_unique
+
+@st.cache_resource
+def get_pyg_renderer() -> "StreamlitRenderer":
+    df = df_ageing_unique
+    # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
+    return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
+
+renderer = get_pyg_renderer()
+
+with st.expander("Generar grafico"):
+    renderer.explorer()
