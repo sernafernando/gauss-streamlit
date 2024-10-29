@@ -144,7 +144,7 @@ def ageing():
 df_ageing = ageing()
 df_ageing_unique = df_ageing.drop_duplicates(subset=["Código"])
 
-def top_10_gen(df, col1, col2, label1, label2, title):
+def top_10_gen(df, col1, col2, label1, label2, title, color_bar='#83c9ff'):
     top_10 = df.nlargest(10, col2)
 
     # Renombrar la columna 'columna' a 'label'
@@ -160,7 +160,8 @@ def top_10_gen(df, col1, col2, label1, label2, title):
     # Crear el gráfico usando nombres completos para los valores
     fig = px.bar(top_10, y=top_10[label1], x=top_10[label2],
                  title=title,
-                 orientation='h')  # Gráfico horizontal
+                 orientation='h',
+                 color_discrete_sequence=[color_bar])  # Gráfico horizontal
 
     # Truncar los nombres de productos largos solo para la visualización en el eje Y
     truncated_names = [(name[:25] + '...') if len(name) > 25 else name for name in top_10[label1]]
@@ -192,16 +193,23 @@ with col_overheader[2]:
 
 df_ageing_active = df_ageing_unique[(df_ageing_unique['Activa'] != False)]
 df_ageing_90 = df_ageing_unique[(df_ageing_unique['Ageing'] > 90)]
+df_ageing_deactive = df_ageing_unique[(df_ageing_unique['Activa'] == False)]
+
 
 col_underheader = st.columns(3)
 
 with col_underheader[0]:
-    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días')
+    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días','#5b8cb2')
 with col_underheader[1]:
     top_10_gen(df_ageing_active, 'Descripción', 'Ageing', 'Producto', 'Ageing', 'Top 10 Productos Activos con mayor Ageing')
+with col_underheader[2]:
+    top_10_gen(df_ageing_deactive, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', 'Top 10 Productos Pausados con mayor Stock','#5b8cb2')
 
 with st.expander("Ageing Activas"):
     df_ageing_active
+
+with st.expander("Ageing Pausadas"):
+    df_ageing_deactive
 
 with st.expander("Ageing completo"): 
     df_ageing_unique
