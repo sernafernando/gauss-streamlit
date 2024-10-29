@@ -6,3 +6,4 @@ python-dateutil
 numpy
 matplotlib
 plotly
+pygwalker
