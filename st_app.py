@@ -29,7 +29,6 @@ st.logo(image="images/white-g-logo.png",
         icon_image="images/white-g.png")
 
 with st.sidebar:
-    st.title("Gauss Online Dashboard")
     st.header("⚙️ Opciones")
     # Seleccionar fechas de inicio y fin
     time_frame = st.selectbox("Seleccionar periodo", ("Todo el tiempo", "Último año calendario", "Últimos 12 meses", "Últimos 6 meses", "Últimos 3 meses", "Último mes"), index=5)
@@ -71,9 +70,12 @@ with st.sidebar:
     if st.button("Actualizar datos"):
         st.cache_data.clear()  # Borra la caché de la función
     
+    st.markdown("---")
+
     st.markdown("##### Seleccione la página:")
     main_page = st.page_link("st_app.py",label="Dashboard",icon="🏠")
     ventas_page = st.page_link("pages/02ventas_ml.py",label="Ventas ML",icon="📈")
+    ageing_page = st.page_link("pages/03ageing.py",label="Ageing",icon="⌛")
 
 
 
@@ -517,7 +519,7 @@ def prueba_torta(df):
 
 # Main Page
 col_overheader = st.columns(3)
-col_header = st.columns(3)
+col_header = st.columns(2)
 
 with col_header[0]:
     """

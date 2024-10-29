@@ -78,7 +78,7 @@ from_date = st.session_state.from_date
 to_date = st.session_state.to_date
 
 @st.cache_data
-def ventas_ml():
+def ageing():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
@@ -92,7 +92,7 @@ def ventas_ml():
     </soap:Header>
     <soap:Body>
             <wsGBPScriptExecute4Dataset xmlns="http://microsoft.com/webservices/">
-                <strScriptLabel>scriptVentasML</strScriptLabel>
+                <strScriptLabel>scriptAgeing</strScriptLabel>
                 <strJSonParameters>{{"fromDate": "{from_date}", "toDate": "{to_date}"}}</strJSonParameters>
             </wsGBPScriptExecute4Dataset>
         </soap:Body>
@@ -138,21 +138,21 @@ def ventas_ml():
     df = pd.DataFrame(column1_list)
     return df
 
-df_ventas_ml = ventas_ml()
+df_ageing = ageing()
 
 
 # Main Page
 col_overheader = st.columns(3)
-col_header = st.columns(3)
+col_header = st.columns(2)
 
 with col_header[0]:
     """
-    # Ventas ML
-    Consulta de Ventas ML
+    # Ageing de productos
+    Con publicaciones activas y/o pausadas.
 
     """
 
 with col_overheader[2]:
     st.image(image="images/white-g-logo.png",use_column_width=True)
 
-df_ventas_ml
+df_ageing
