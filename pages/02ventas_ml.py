@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from st_app import LargeXMLHandler
 
+# Set page config
+st.set_page_config(page_title="Gauss Online | Ventas ML", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
+
 st.logo(image="images/white-g-logo.png", 
         icon_image="images/white-g.png")
 
