@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from st_app import LargeXMLHandler
 
+# Set page config
+st.set_page_config(page_title="Gauss Online | Ageing", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
+
 st.logo(image="images/white-g-logo.png", 
         icon_image="images/white-g.png")
 
@@ -139,6 +142,38 @@ def ageing():
     return df
 
 df_ageing = ageing()
+df_ageing_unique = df_ageing.drop_duplicates(subset=["Código"])
+
+def top_10_gen(df, col1, col2, label1, label2, title):
+    top_10 = df.nlargest(10, col2)
+
+    # Renombrar la columna 'columna' a 'label'
+    top_10 = top_10.rename(columns={col2: label2, col1: label1})
+
+    # Verificar los datos antes de graficar
+    if (top_10[label2] < 0).any():
+        print("Hay valores negativos en la columna:", top_10[label2][top_10[label2] < 0])
+
+    # Ordenar por el valor de 'label2' de mayor a menor
+    top_10 = top_10.sort_values(by=label2, ascending=False)
+
+    # Crear el gráfico usando nombres completos para los valores
+    fig = px.bar(top_10, y=top_10[label1], x=top_10[label2],
+                 title=title,
+                 orientation='h')  # Gráfico horizontal
+
+    # Truncar los nombres de productos largos solo para la visualización en el eje Y
+    truncated_names = [(name[:25] + '...') if len(name) > 25 else name for name in top_10[label1]]
+
+    # Actualizar el gráfico para usar los nombres truncados en el eje Y
+    fig.update_layout(yaxis_tickvals=top_10[label1],
+                      yaxis_ticktext=truncated_names, 
+                      yaxis=dict(categoryorder='total ascending'))  # Invertir el orden en el eje Y
+
+
+
+    st.plotly_chart(fig)
+
 
 
 # Main Page
@@ -155,4 +190,18 @@ with col_header[0]:
 with col_overheader[2]:
     st.image(image="images/white-g-logo.png",use_column_width=True)
 
-df_ageing
+df_ageing_active = df_ageing_unique[(df_ageing_unique['Activa'] != False)]
+df_ageing_90 = df_ageing_unique[(df_ageing_unique['Ageing'] > 90)]
+
+col_underheader = st.columns(3)
+
+with col_underheader[0]:
+    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días')
+with col_underheader[1]:
+    top_10_gen(df_ageing_active, 'Descripción', 'Ageing', 'Producto', 'Ageing', 'Top 10 Productos Activos con mayor Ageing')
+
+with st.expander("Ageing Activas"):
+    df_ageing_active
+
+with st.expander("Ageing completo"): 
+    df_ageing_unique

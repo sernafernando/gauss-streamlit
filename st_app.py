@@ -16,7 +16,7 @@ import plotly.express as px
 
 
 # Set page config
-st.set_page_config(page_title="Gauss Online Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Gauss Online | Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
 
 
 # Establecer el locale para el formato deseado
@@ -447,7 +447,7 @@ def display_top_10_gen(df, col1, col2, label1, label2):
 
     # Crear el gráfico
     fig = px.bar(top_10, x=label1, y=label2,
-             title=f'Top 10 {label1} por {label2}')
+             title=f'Top 10 {label1}s por {label2}')
     
     st.plotly_chart(fig)
 
@@ -626,9 +626,6 @@ with st.expander("DataFrame periodo:"):
 st.markdown("---")
 
 
-
-# Copia de df_merged
-df_filter = df_merged.copy()
 
 # Asegurarse de que las columnas de fechas estén en formato datetime
 df_merged['Fecha'] = pd.to_datetime(df_merged['Fecha'], errors='coerce', format="%d/%m/%Y %H:%M:%S")
