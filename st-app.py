@@ -504,12 +504,19 @@ def prueba_torta(df):
     
 
 # Main Page
+col_overheader = st.columns(3)
+col_header = st.columns(3)
 
-"""
-# Ventas ML
-Consulta de Ventas ML
+with col_header[0]:
+    """
+    # Ventas ML
+    Consulta de Ventas ML
 
-"""
+    """
+
+with col_overheader[2]:
+    st.image(image="images/white-g-logo.png",use_column_width=True)
+
 #  Verificar que la fecha de inicio no sea mayor a la fecha de fin
 if from_date > to_date:
     st.error("La fecha de inicio no puede ser mayor a la fecha de fin.")
@@ -564,7 +571,7 @@ def display_envios(df):
 #st.subheader("Total periodo")
 #display_totals(totales)
 #display_envios(df_merged)
-
+col_over_envios = st.columns(3)
 col_under_envios = st.columns(3)
 
 with col_under_envios[0]:
@@ -575,10 +582,11 @@ with col_under_envios[0]:
         st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
         st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 with col_under_envios[1]:
+    st.markdown("#### Detalle de envíos:")
     prueba_torta(df_merged)
-
-with col_under_envios[2]:
+with col_over_envios[2]:
     seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación", "Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
+with col_under_envios[2]:
     if seleccionar_grafico == "Top 10 SubCategoría por Facturación":
         display_top_10_subcategorias(df_merged)
     elif seleccionar_grafico == "Top 10 Categoría por Facturación":
@@ -730,6 +738,7 @@ with col_under_flex[0]:
         st.metric("Total Markup", f"{total_markup_filtered:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 
 with col_under_flex[1]:
+    st.markdown("#### Detalle de envíos filtrados:")
     prueba_torta(df_filter)
 
 with col_under_flex[2]:
