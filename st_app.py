@@ -680,10 +680,10 @@ dynamic_filters.display_filters(location='columns', num_columns=4, gap='small')
 
 filtered_df = dynamic_filters.filter_df(except_filter='None')
 
-with col_selectbox[2]:
-    st.markdown("")
-    st.markdown("")
-    st.button("Limpiar Filtros", on_click=dynamic_filters.reset_filters())
+#with col_selectbox[2]:
+#    st.markdown("")
+#    st.markdown("")
+#    st.button("Limpiar Filtros", on_click=dynamic_filters.reset_filters())
 
 df_filter = filtered_df
 
