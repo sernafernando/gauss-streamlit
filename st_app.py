@@ -13,7 +13,8 @@ import numpy as np
 import io
 import matplotlib.pyplot as plt
 import plotly.express as px
-
+from streamlit_dynamic_filters import DynamicFilters
+ 
 
 # Set page config
 st.set_page_config(page_title="Gauss Online | Dashboard", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
@@ -633,33 +634,37 @@ df_merged['Fecha'] = pd.to_datetime(df_merged['Fecha'], errors='coerce', format=
 # Filtro por 'Marca' en el DataFrame
 unique_brands = df_merged['Marca'].unique()
 sorted_brands = sorted(unique_brands)
+
+    
+st.write("Aplicar los filtros en cualquier orden 👇")
 col_selectbox = st.columns(5)
 
-with col_selectbox[0]:
-    selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
-    
+#with col_selectbox[0]:
+#   selected_brand = st.selectbox("Selecciona una marca:", ["Todas"] + sorted_brands)
+
 
 # Filtrar por marca seleccionada
 df_filter = df_merged.copy()
-if selected_brand != "Todas":
-    df_filter = df_filter[df_filter['Marca'] == selected_brand]
-        
+
+# Filtrar el DataFrame en base a las fechas seleccionadas
+
+
+
 
 # Crear dos entradas de fecha
-with col_selectbox[1]:
+with col_selectbox[0]:
     start_date = st.date_input("Fecha inicial:", value=df_merged['Fecha'].min())
     
 
-with col_selectbox[2]:
+with col_selectbox[1]:
     end_date = st.date_input("Fecha final:", value=df_merged['Fecha'].max() + timedelta(days=1))
 
+
+
 with col_selectbox[4]:
-    if selected_brand != "Todas":
-        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
-    else:
         seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
 
-# Filtrar el DataFrame en base a las fechas seleccionadas
+
 df_filter = df_filter[(df_filter['Fecha'] >= pd.to_datetime(start_date)) & 
                       (df_filter['Fecha'] <= pd.to_datetime(end_date))]
 
@@ -669,6 +674,18 @@ filtro_monto_total = df_filter['Monto_Total'].sum()
 last_day = df_filter['Fecha'].max() + timedelta(days=1)
 day_before = last_day - pd.Timedelta(days=1)  # Obtener la fecha de ayer
 
+dynamic_filters = DynamicFilters(df_filter, filters=['Marca','SubCategoría','Categoría', 'Descripción'])
+
+dynamic_filters.display_filters(location='columns', num_columns=4, gap='small')
+
+filtered_df = dynamic_filters.filter_df(except_filter='None')
+
+with col_selectbox[2]:
+    st.markdown("")
+    st.markdown("")
+    st.button("Limpiar Filtros", on_click=dynamic_filters.reset_filters())
+
+df_filter = filtered_df
 
 # Formatear los totales
 total_limpio_filtered = df_filter['Limpio'].sum()
