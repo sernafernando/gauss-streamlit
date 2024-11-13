@@ -391,7 +391,7 @@ df_merged['Costo envío'] = np.where(
 
 def limpiar(row):
     if pd.isnull(row['ML_pack_id']):  # Verifica si ML_pack_id está vacío
-        return (row['Monto_Unitario'] * row['Cantidad']) - (row['Costo envío'] / 1.21) - row['Comisión en pesos']
+        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad'])  - row['Comisión en pesos']
     else:
         #contar_si = row['contar_si']  # Utiliza el valor de 'contar_si' calculado por cada fila
         return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
