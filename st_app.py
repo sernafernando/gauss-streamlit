@@ -594,7 +594,7 @@ with col_header[0]:
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_column_width=True)
+    st.image(image="images/white-g-logo.png",use_container_width=True)
 
 #  Verificar que la fecha de inicio no sea mayor a la fecha de fin
 if from_date > to_date:
@@ -710,7 +710,6 @@ col_selectbox = st.columns(5)
 
 # Filtrar por marca seleccionada
 df_filter = df_merged.copy()
-df_group = df_merged.copy()
 # Filtrar el DataFrame en base a las fechas seleccionadas
 
 
@@ -859,7 +858,7 @@ with st.expander("Filtro de columnas"):
     # Inicializa el estado de la sesión si no existe
     if 'selected_columns' not in st.session_state:
         # Aquí se especifican las columnas que deben estar seleccionadas por defecto
-        st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp"]  # Empieza vacío para que todas estén destildadas
+        st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp","costo_total_iva","Costo envío"]  # Empieza vacío para que todas estén destildadas
 
     # Título de la aplicación
     st.subheader("Seleccionar las columnas a visualizar")
@@ -889,8 +888,9 @@ filtered_df = df_filter[st.session_state.selected_columns]
 with st.expander("DataFrame filtrado:"):
     st.dataframe(filtered_df)
 
+
+df_group = filtered_df.copy()
 # Línea separadora
-st.markdown("---")
 
 df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
 df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
