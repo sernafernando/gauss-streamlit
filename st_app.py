@@ -386,13 +386,15 @@ df_merged['Costo envío'] = np.where(
     df_merged['mlp_price4FreeShipping'], df_merged['mlp_price4FreeShipping']
 )
 
+# Crea una columna auxiliar con la cuenta de cada 'ML_pack_id'
+#df_merged['contar_si'] = df_merged.groupby('ML_pack_id')['ML_pack_id'].transform('count')
+
 def limpiar(row):
     if pd.isnull(row['ML_pack_id']):  # Verifica si ML_pack_id está vacío
         return (row['Monto_Unitario'] * row['Cantidad']) - (row['Costo envío'] / 1.21) - row['Comisión en pesos']
     else:
-        contar_si = df_merged['ML_pack_id'].value_counts().get(row['ML_pack_id'], 1)  # Cuenta las ocurrencias de ML_pack_id en la columna
-        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / contar_si) / 1.21) - row['Comisión en pesos']
-
+        #contar_si = row['contar_si']  # Utiliza el valor de 'contar_si' calculado por cada fila
+        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
 
 
 # Aplicar la función a cada fila y guardar el resultado en una nueva columna
