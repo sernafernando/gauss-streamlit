@@ -386,13 +386,15 @@ df_merged['Costo envío'] = np.where(
     df_merged['mlp_price4FreeShipping'], df_merged['mlp_price4FreeShipping']
 )
 
+# Crea una columna auxiliar con la cuenta de cada 'ML_pack_id'
+#df_merged['contar_si'] = df_merged.groupby('ML_pack_id')['ML_pack_id'].transform('count')
+
 def limpiar(row):
     if pd.isnull(row['ML_pack_id']):  # Verifica si ML_pack_id está vacío
-        return (row['Monto_Unitario'] * row['Cantidad']) - (row['Costo envío'] / 1.21) - row['Comisión en pesos']
+        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad'])  - row['Comisión en pesos']
     else:
-        contar_si = df_merged['ML_pack_id'].value_counts().get(row['ML_pack_id'], 1)  # Cuenta las ocurrencias de ML_pack_id en la columna
-        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / contar_si) / 1.21) - row['Comisión en pesos']
-
+        #contar_si = row['contar_si']  # Utiliza el valor de 'contar_si' calculado por cada fila
+        return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
 
 
 # Aplicar la función a cada fila y guardar el resultado en una nueva columna
@@ -592,7 +594,7 @@ with col_header[0]:
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_column_width=True)
+    st.image(image="images/white-g-logo.png",use_container_width=True)
 
 #  Verificar que la fecha de inicio no sea mayor a la fecha de fin
 if from_date > to_date:
@@ -708,7 +710,6 @@ col_selectbox = st.columns(5)
 
 # Filtrar por marca seleccionada
 df_filter = df_merged.copy()
-df_group = df_merged.copy()
 # Filtrar el DataFrame en base a las fechas seleccionadas
 
 
@@ -857,7 +858,7 @@ with st.expander("Filtro de columnas"):
     # Inicializa el estado de la sesión si no existe
     if 'selected_columns' not in st.session_state:
         # Aquí se especifican las columnas que deben estar seleccionadas por defecto
-        st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp"]  # Empieza vacío para que todas estén destildadas
+        st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp","costo_total_iva","Costo envío"]  # Empieza vacío para que todas estén destildadas
 
     # Título de la aplicación
     st.subheader("Seleccionar las columnas a visualizar")
@@ -887,8 +888,9 @@ filtered_df = df_filter[st.session_state.selected_columns]
 with st.expander("DataFrame filtrado:"):
     st.dataframe(filtered_df)
 
+
+df_group = filtered_df.copy()
 # Línea separadora
-st.markdown("---")
 
 df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
 df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum', 'Marca': 'first', 'Categoría': 'first', 'SubCategoría': 'first'})
