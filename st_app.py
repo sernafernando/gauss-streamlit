@@ -310,8 +310,8 @@ df['Costo en pesos'] = np.where(
 
 # subcat to group
 data_subcat = {
-    'subcat_id': [3821,3820,3882,3819,3818,3885,3879,3869,3870,3919,3915,3841,3858,3922,3860,3861,3902,3866,3856,3893,3886,3887,3924,3921,3920,3912,3913,3878,3875,3876,3880,3894,3853,3931,3926,3891,3843,3918,3849,3888,3852,3899,3838,3895,3896,3957],
-    'group': [2,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,7,7,7,7,8,8,8,8,8,8,3]
+    'subcat_id': [3821,3820,3882,3819,3818,3885,3879,3869,3870,3919,3915,3841,3858,3922,3860,3861,3902,3866,3856,3893,3886,3887,3924,3921,3920,3912,3913,3878,3875,3876,3880,3894,3853,3931,3926,3891,3843,3918,3849,3888,3852,3899,3838,3895,3896,3957,3907],
+    'group': [2,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,7,7,7,7,8,8,8,8,8,8,3,3]
 }
 
 # Verificación de longitudes
@@ -891,7 +891,7 @@ with st.expander("DataFrame filtrado:"):
 st.markdown("---")
 
 df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
-df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
+df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum', 'Marca': 'first', 'Categoría': 'first', 'SubCategoría': 'first'})
 
 # Aplicamos la función y formateamos el resultado.
 df_groupbybrand['MarkUp'] = df_groupbybrand.apply(markupear, axis=1)
@@ -911,6 +911,28 @@ df_final = df_groupbyitem.merge(df_ageing_unique[['Código', 'Ageing']],
 
 df_final.drop(columns='Código', inplace=True)
 
+# Cambiar temporalmente los nombres de las columnas para que sean únicos
+df_final_renamed = df_final.rename(columns={
+    'Marca': 'brand',
+    'SubCategoría': 'subcat',
+    'Categoría': 'cat',
+    'Descripción': 'item_desc'
+})
+
+dynamic_filters2 = DynamicFilters(df_filter, filters=['brand','subcat','cat', 'item_desc'])
+
+dynamic_filters2.display_filters(location='columns', num_columns=4, gap='small')
+
+filtered_df2 = dynamic_filters.filter_df(except_filter='None')
+
+# Restaurar los nombres originales de las columnas después de aplicar el filtro
+df_final_filtered = filtered_df2.rename(columns={
+    'brand': 'Marca',
+    'subcat': 'SubCategoría',
+    'cat': 'Categoría',
+    'item_desc': 'Descripción'
+})
+
 
 with st.expander("Agrupado por Productos:"):
-    st.dataframe(df_final)
+    st.dataframe(df_final_filtered)

@@ -1,0 +1,480 @@
+[33mcommit c30633088552b424367dc50e503e5effa786fa87[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Fernando <sernafernando@gmail.com>
+Date:   Fri Oct 25 17:24:06 2024 -0300
+
+    Corregidos % de comisiones
+
+[1mdiff --git a/.streamlit/secrets.toml b/.streamlit/secrets.toml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ee37834[m
+[1m--- /dev/null[m
+[1m+++ b/.streamlit/secrets.toml[m
+[36m@@ -0,0 +1,6 @@[m
+[32m+[m[32m[api][m
+[32m+[m[32musername = "SheetsJSON"[m
+[32m+[m[32mpassword = "Gauss12345"[m
+[32m+[m[32mcompany = 1[m
+[32m+[m[32mwebwervice = 1001[m
+[32m+[m[32murl_ws = "http://ws.globalbluepoint.com/pastoriza/app_webservices/wsBasicQuery.asmx"[m
+\ No newline at end of file[m
+[1mdiff --git a/.venv/Lib/site-packages/.DS_Store b/.venv/Lib/site-packages/.DS_Store[m
+[1mnew file mode 100644[m
+[1mindex 0000000..725b647[m
+Binary files /dev/null and b/.venv/Lib/site-packages/.DS_Store differ
+[1mdiff --git a/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/AUTHORS b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/AUTHORS[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9311b39[m
+[1m--- /dev/null[m
+[1m+++ b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/AUTHORS[m
+[36m@@ -0,0 +1,58 @@[m
+[32m+[m[32mGitPython was originally written by Michael Trier.[m
+[32m+[m[32mGitPython 0.2 was partially (re)written by Sebastian Thiel, based on 0.1.6 and git-dulwich.[m
+[32m+[m
+[32m+[m[32mContributors are:[m
+[32m+[m
+[32m+[m[32m-Michael Trier <mtrier _at_ gmail.com>[m
+[32m+[m[32m-Alan Briolat[m
+[32m+[m[32m-Florian Apolloner <florian _at_ apolloner.eu>[m
+[32m+[m[32m-David Aguilar <davvid _at_ gmail.com>[m
+[32m+[m[32m-Jelmer Vernooij <jelmer _at_ samba.org>[m
+[32m+[m[32m-Steve Frécinaux <code _at_ istique.net>[m
+[32m+[m[32m-Kai Lautaportti <kai _at_ lautaportti.fi>[m
+[32m+[m[32m-Paul Sowden <paul _at_ idontsmoke.co.uk>[m
+[32m+[m[32m-Sebastian Thiel <byronimo _at_ gmail.com>[m
+[32m+[m[32m-Jonathan Chu <jonathan.chu _at_ me.com>[m
+[32m+[m[32m-Vincent Driessen <me _at_ nvie.com>[m
+[32m+[m[32m-Phil Elson <pelson _dot_ pub _at_ gmail.com>[m
+[32m+[m[32m-Bernard `Guyzmo` Pratz <guyzmo+gitpython+pub@m0g.net>[m
+[32m+[m[32m-Timothy B. Hartman <tbhartman _at_ gmail.com>[m
+[32m+[m[32m-Konstantin Popov <konstantin.popov.89 _at_ yandex.ru>[m
+[32m+[m[32m-Peter Jones <pjones _at_ redhat.com>[m
+[32m+[m[32m-Anson Mansfield <anson.mansfield _at_ gmail.com>[m
+[32m+[m[32m-Ken Odegard <ken.odegard _at_ gmail.com>[m
+[32m+[m[32m-Alexis Horgix Chotard[m
+[32m+[m[32m-Piotr Babij <piotr.babij _at_ gmail.com>[m
+[32m+[m[32m-Mikuláš Poul <mikulaspoul _at_ gmail.com>[m
+[32m+[m[32m-Charles Bouchard-Légaré <cblegare.atl _at_ ntis.ca>[m
+[32m+[m[32m-Yaroslav Halchenko <debian _at_ onerussian.com>[m
+[32m+[m[32m-Tim Swast <swast _at_ google.com>[m
+[32m+[m[32m-William Luc Ritchie[m
+[32m+[m[32m-David Host <hostdm _at_ outlook.com>[m
+[32m+[m[32m-A. Jesse Jiryu Davis <jesse _at_ emptysquare.net>[m
+[32m+[m[32m-Steven Whitman <ninloot _at_ gmail.com>[m
+[32m+[m[32m-Stefan Stancu <stefan.stancu _at_ gmail.com>[m
+[32m+[m[32m-César Izurieta <cesar _at_ caih.org>[m
+[32m+[m[32m-Arthur Milchior <arthur _at_ milchior.fr>[m
+[32m+[m[32m-Anil Khatri <anil.soccer.khatri _at_ gmail.com>[m
+[32m+[m[32m-JJ Graham <thetwoj _at_ gmail.com>[m
+[32m+[m[32m-Ben Thayer <ben _at_ benthayer.com>[m
+[32m+[m[32m-Dries Kennes <admin _at_ dries007.net>[m
+[32m+[m[32m-Pratik Anurag <panurag247365 _at_ gmail.com>[m
+[32m+[m[32m-Harmon <harmon.public _at_ gmail.com>[m
+[32m+[m[32m-Liam Beguin <liambeguin _at_ gmail.com>[m
+[32m+[m[32m-Ram Rachum <ram _at_ rachum.com>[m
+[32m+[m[32m-Alba Mendez <me _at_ alba.sh>[m
+[32m+[m[32m-Robert Westman <robert _at_ byteflux.io>[m
+[32m+[m[32m-Hugo van Kemenade[m
+[32m+[m[32m-Hiroki Tokunaga <tokusan441 _at_ gmail.com>[m
+[32m+[m[32m-Julien Mauroy <pro.julien.mauroy _at_ gmail.com>[m
+[32m+[m[32m-Patrick Gerard[m
+[32m+[m[32m-Luke Twist <itsluketwist@gmail.com>[m
+[32m+[m[32m-Joseph Hale <me _at_ jhale.dev>[m
+[32m+[m[32m-Santos Gallegos <stsewd _at_ proton.me>[m
+[32m+[m[32m-Wenhan Zhu <wzhu.cosmos _at_ gmail.com>[m
+[32m+[m[32m-Eliah Kagan <eliah.kagan _at_ gmail.com>[m
+[32m+[m[32m-Ethan Lin <et.repositories _at_ gmail.com>[m
+[32m+[m
+[32m+[m[32mPortions derived from other open source works and are clearly marked.[m
+[1mdiff --git a/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/INSTALLER b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/INSTALLER[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a1b589e[m
+[1m--- /dev/null[m
+[1m+++ b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/INSTALLER[m
+[36m@@ -0,0 +1 @@[m
+[32m+[m[32mpip[m
+[1mdiff --git a/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/LICENSE b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/LICENSE[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ba8a219[m
+[1m--- /dev/null[m
+[1m+++ b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/LICENSE[m
+[36m@@ -0,0 +1,29 @@[m
+[32m+[m[32mCopyright (C) 2008, 2009 Michael Trier and contributors[m
+[32m+[m[32mAll rights reserved.[m
+[32m+[m
+[32m+[m[32mRedistribution and use in source and binary forms, with or without[m
+[32m+[m[32mmodification, are permitted provided that the following conditions[m
+[32m+[m[32mare met:[m
+[32m+[m
+[32m+[m[32m* Redistributions of source code must retain the above copyright[m
+[32m+[m[32mnotice, this list of conditions and the following disclaimer.[m
+[32m+[m
+[32m+[m[32m* Redistributions in binary form must reproduce the above copyright[m
+[32m+[m[32mnotice, this list of conditions and the following disclaimer in the[m
+[32m+[m[32mdocumentation and/or other materials provided with the distribution.[m
+[32m+[m
+[32m+[m[32m* Neither the name of the GitPython project nor the names of[m
+[32m+[m[32mits contributors may be used to endorse or promote products derived[m
+[32m+[m[32mfrom this software without specific prior written permission.[m
+[32m+[m
+[32m+[m[32mTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS[m
+[32m+[m[32m"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT[m
+[32m+[m[32mLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR[m
+[32m+[m[32mA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT[m
+[32m+[m[32mOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,[m
+[32m+[m[32mSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED[m
+[32m+[m[32mTO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR[m
+[32m+[m[32mPROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF[m
+[32m+[m[32mLIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING[m
+[32m+[m[32mNEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS[m
+[32m+[m[32mSOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.[m
+[1mdiff --git a/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/METADATA b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/METADATA[m
+[1mnew file mode 100644[m
+[1mindex 0000000..be62810[m
+[1m--- /dev/null[m
+[1m+++ b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/METADATA[m
+[36m@@ -0,0 +1,297 @@[m
+[32m+[m[32mMetadata-Version: 2.1[m
+[32m+[m[32mName: GitPython[m
+[32m+[m[32mVersion: 3.1.43[m
+[32m+[m[32mSummary: GitPython is a Python library used to interact with Git repositories[m
+[32m+[m[32mHome-page: https://github.com/gitpython-developers/GitPython[m
+[32m+[m[32mAuthor: Sebastian Thiel, Michael Trier[m
+[32m+[m[32mAuthor-email: byronimo@gmail.com, mtrier@gmail.com[m
+[32m+[m[32mLicense: BSD-3-Clause[m
+[32m+[m[32mClassifier: Development Status :: 5 - Production/Stable[m
+[32m+[m[32mClassifier: Environment :: Console[m
+[32m+[m[32mClassifier: Intended Audience :: Developers[m
+[32m+[m[32mClassifier: License :: OSI Approved :: BSD License[m
+[32m+[m[32mClassifier: Operating System :: OS Independent[m
+[32m+[m[32mClassifier: Operating System :: POSIX[m
+[32m+[m[32mClassifier: Operating System :: Microsoft :: Windows[m
+[32m+[m[32mClassifier: Operating System :: MacOS :: MacOS X[m
+[32m+[m[32mClassifier: Typing :: Typed[m
+[32m+[m[32mClassifier: Programming Language :: Python[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.7[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.8[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.9[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.10[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.11[m
+[32m+[m[32mClassifier: Programming Language :: Python :: 3.12[m
+[32m+[m[32mRequires-Python: >=3.7[m
+[32m+[m[32mDescription-Content-Type: text/markdown[m
+[32m+[m[32mLicense-File: LICENSE[m
+[32m+[m[32mLicense-File: AUTHORS[m
+[32m+[m[32mRequires-Dist: gitdb <5,>=4.0.1[m
+[32m+[m[32mRequires-Dist: typing-extensions >=3.7.4.3 ; python_version < "3.8"[m
+[32m+[m[32mProvides-Extra: doc[m
+[32m+[m[32mRequires-Dist: sphinx ==4.3.2 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinx-rtd-theme ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinxcontrib-applehelp <=1.0.4,>=1.0.2 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinxcontrib-devhelp ==1.0.2 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinxcontrib-htmlhelp <=2.0.1,>=2.0.0 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinxcontrib-qthelp ==1.0.3 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinxcontrib-serializinghtml ==1.1.5 ; extra == 'doc'[m
+[32m+[m[32mRequires-Dist: sphinx-autodoc-typehints ; extra == 'doc'[m
+[32m+[m[32mProvides-Extra: test[m
+[32m+[m[32mRequires-Dist: coverage[toml] ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: ddt !=1.4.3,>=1.1.1 ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: mypy ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pre-commit ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pytest >=7.3.1 ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pytest-cov ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pytest-instafail ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pytest-mock ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: pytest-sugar ; extra == 'test'[m
+[32m+[m[32mRequires-Dist: typing-extensions ; (python_version < "3.11") and extra == 'test'[m
+[32m+[m[32mRequires-Dist: mock ; (python_version < "3.8") and extra == 'test'[m
+[32m+[m
+[32m+[m[32m![Python package](https://github.com/gitpython-developers/GitPython/workflows/Python%20package/badge.svg)[m
+[32m+[m[32m[![Documentation Status](https://readthedocs.org/projects/gitpython/badge/?version=stable)](https://readthedocs.org/projects/gitpython/?badge=stable)[m
+[32m+[m[32m[![Packaging status](https://repology.org/badge/tiny-repos/python:gitpython.svg)](https://repology.org/metapackage/python:gitpython/versions)[m
+[32m+[m
+[32m+[m[32m## [Gitoxide](https://github.com/Byron/gitoxide): A peek into the future…[m
+[32m+[m
+[32m+[m[32mI started working on GitPython in 2009, back in the days when Python was 'my thing' and I had great plans with it.[m
+[32m+[m[32mOf course, back in the days, I didn't really know what I was doing and this shows in many places. Somewhat similar to[m
+[32m+[m[32mPython this happens to be 'good enough', but at the same time is deeply flawed and broken beyond repair.[m
+[32m+[m
+[32m+[m[32mBy now, GitPython is widely used and I am sure there is a good reason for that, it's something to be proud of and happy about.[m
+[32m+[m[32mThe community is maintaining the software and is keeping it relevant for which I am absolutely grateful. For the time to come I am happy to continue maintaining GitPython, remaining hopeful that one day it won't be needed anymore.[m
+[32m+[m
+[32m+[m[32mMore than 15 years after my first meeting with 'git' I am still in excited about it, and am happy to finally have the tools and[m
+[32m+[m[32mprobably the skills to scratch that itch of mine: implement `git` in a way that makes tool creation a piece of cake for most.[m
+[32m+[m
+[32m+[m[32mIf you like the idea and want to learn more, please head over to [gitoxide](https://github.com/Byron/gitoxide), an[m
+[32m+[m[32mimplementation of 'git' in [Rust](https://www.rust-lang.org).[m
+[32m+[m
+[32m+[m[32m*(Please note that `gitoxide` is not currently available for use in Python, and that Rust is required.)*[m
+[32m+[m
+[32m+[m[32m## GitPython[m
+[32m+[m
+[32m+[m[32mGitPython is a python library used to interact with git repositories, high-level like git-porcelain,[m
+[32m+[m[32mor low-level like git-plumbing.[m
+[32m+[m
+[32m+[m[32mIt provides abstractions of git objects for easy access of repository data often backed by calling the `git`[m
+[32m+[m[32mcommand-line program.[m
+[32m+[m
+[32m+[m[32m### DEVELOPMENT STATUS[m
+[32m+[m
+[32m+[m[32mThis project is in **maintenance mode**, which means that[m
+[32m+[m
+[32m+[m[32m- …there will be no feature development, unless these are contributed[m
+[32m+[m[32m- …there will be no bug fixes, unless they are relevant to the safety of users, or contributed[m
+[32m+[m[32m- …issues will be responded to with waiting times of up to a month[m
+[32m+[m
+[32m+[m[32mThe project is open to contributions of all kinds, as well as new maintainers.[m
+[32m+[m
+[32m+[m[32m### REQUIREMENTS[m
+[32m+[m
+[32m+[m[32mGitPython needs the `git` executable to be installed on the system and available in your[m
+[32m+[m[32m`PATH` for most operations. If it is not in your `PATH`, you can help GitPython find it[m
+[32m+[m[32mby setting the `GIT_PYTHON_GIT_EXECUTABLE=<path/to/git>` environment variable.[m
+[32m+[m
+[32m+[m[32m- Git (1.7.x or newer)[m
+[32m+[m[32m- Python >= 3.7[m
+[32m+[m
+[32m+[m[32mThe list of dependencies are listed in `./requirements.txt` and `./test-requirements.txt`.[m
+[32m+[m[32mThe installer takes care of installing them for you.[m
+[32m+[m
+[32m+[m[32m### INSTALL[m
+[32m+[m
+[32m+[m[32mGitPython and its required package dependencies can be installed in any of the following ways, all of which should typically be done in a [virtual environment](https://docs.python.org/3/tutorial/venv.html).[m
+[32m+[m
+[32m+[m[32m#### From PyPI[m
+[32m+[m
+[32m+[m[32mTo obtain and install a copy [from PyPI](https://pypi.org/project/GitPython/), run:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpip install GitPython[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m(A distribution package can also be downloaded for manual installation at [the PyPI page](https://pypi.org/project/GitPython/).)[m
+[32m+[m
+[32m+[m[32m#### From downloaded source code[m
+[32m+[m
+[32m+[m[32mIf you have downloaded the source code, run this from inside the unpacked `GitPython` directory:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpip install .[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m#### By cloning the source code repository[m
+[32m+[m
+[32m+[m[32mTo clone the [the GitHub repository](https://github.com/gitpython-developers/GitPython) from source to work on the code, you can do it like so:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mgit clone https://github.com/gitpython-developers/GitPython[m
+[32m+[m[32mcd GitPython[m
+[32m+[m[32m./init-tests-after-clone.sh[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mOn Windows, `./init-tests-after-clone.sh` can be run in a Git Bash shell.[m
+[32m+[m
+[32m+[m[32mIf you are cloning [your own fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks), then replace the above `git clone` command with one that gives the URL of your fork. Or use this [`gh`](https://cli.github.com/) command (assuming you have `gh` and your fork is called `GitPython`):[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mgh repo clone GitPython[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mHaving cloned the repo, create and activate your [virtual environment](https://docs.python.org/3/tutorial/venv.html).[m
+[32m+[m
+[32m+[m[32mThen make an [editable install](https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs):[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpip install -e ".[test]"[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mIn the less common case that you do not want to install test dependencies, `pip install -e .` can be used instead.[m
+[32m+[m
+[32m+[m[32m#### With editable *dependencies* (not preferred, and rarely needed)[m
+[32m+[m
+[32m+[m[32mIn rare cases, you may want to work on GitPython and one or both of its [gitdb](https://github.com/gitpython-developers/gitdb) and [smmap](https://github.com/gitpython-developers/smmap) dependencies at the same time, with changes in your local working copy of gitdb or smmap immediatley reflected in the behavior of your local working copy of GitPython. This can be done by making editable installations of those dependencies in the same virtual environment where you install GitPython.[m
+[32m+[m
+[32m+[m[32mIf you want to do that *and* you want the versions in GitPython's git submodules to be used, then pass `-e git/ext/gitdb` and/or `-e git/ext/gitdb/gitdb/ext/smmap` to `pip install`. This can be done in any order, and in separate `pip install` commands or the same one, so long as `-e` appears before *each* path. For example, you can install GitPython, gitdb, and smmap editably in the currently active virtual environment this way:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpip install -e ".[test]" -e git/ext/gitdb -e git/ext/gitdb/gitdb/ext/smmap[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mThe submodules must have been cloned for that to work, but that will already be the case if you have run `./init-tests-after-clone.sh`. You can use `pip list` to check which packages are installed editably and which are installed normally.[m
+[32m+[m
+[32m+[m[32mTo reiterate, this approach should only rarely be used. For most development it is preferable to allow the gitdb and smmap dependencices to be retrieved automatically from PyPI in their latest stable packaged versions.[m
+[32m+[m
+[32m+[m[32m### Limitations[m
+[32m+[m
+[32m+[m[32m#### Leakage of System Resources[m
+[32m+[m
+[32m+[m[32mGitPython is not suited for long-running processes (like daemons) as it tends to[m
+[32m+[m[32mleak system resources. It was written in a time where destructors (as implemented[m
+[32m+[m[32min the `__del__` method) still ran deterministically.[m
+[32m+[m
+[32m+[m[32mIn case you still want to use it in such a context, you will want to search the[m
+[32m+[m[32mcodebase for `__del__` implementations and call these yourself when you see fit.[m
+[32m+[m
+[32m+[m[32mAnother way assure proper cleanup of resources is to factor out GitPython into a[m
+[32m+[m[32mseparate process which can be dropped periodically.[m
+[32m+[m
+[32m+[m[32m#### Windows support[m
+[32m+[m
+[32m+[m[32mSee [Issue #525](https://github.com/gitpython-developers/GitPython/issues/525).[m
+[32m+[m
+[32m+[m[32m### RUNNING TESTS[m
+[32m+[m
+[32m+[m[32m_Important_: Right after cloning this repository, please be sure to have executed[m
+[32m+[m[32mthe `./init-tests-after-clone.sh` script in the repository root. Otherwise[m
+[32m+[m[32myou will encounter test failures.[m
+[32m+[m
+[32m+[m[32m#### Install test dependencies[m
+[32m+[m
+[32m+[m[32mEnsure testing libraries are installed. This is taken care of already if you installed with:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpip install -e ".[test]"[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mIf you had installed with a command like `pip install -e .` instead, you can still run[m
+[32m+[m[32mthe above command to add the testing dependencies.[m
+[32m+[m
+[32m+[m[32m#### Test commands[m
+[32m+[m
+[32m+[m[32mTo test, run:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpytest[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mTo lint, and apply some linting fixes as well as automatic code formatting, run:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mpre-commit run --all-files[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mThis includes the linting and autoformatting done by Ruff, as well as some other checks.[m
+[32m+[m
+[32m+[m[32mTo typecheck, run:[m
+[32m+[m
+[32m+[m[32m```sh[m
+[32m+[m[32mmypy[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32m#### CI (and tox)[m
+[32m+[m
+[32m+[m[32mStyle and formatting checks, and running tests on all the different supported Python versions, will be performed:[m
+[32m+[m
+[32m+[m[32m- Upon submitting a pull request.[m
+[32m+[m[32m- On each push, *if* you have a fork with GitHub Actions enabled.[m
+[32m+[m[32m- Locally, if you run [`tox`](https://tox.wiki/) (this skips any Python versions you don't have installed).[m
+[32m+[m
+[32m+[m[32m#### Configuration files[m
+[32m+[m
+[32m+[m[32mSpecific tools are all configured in the `./pyproject.toml` file:[m
+[32m+[m
+[32m+[m[32m- `pytest` (test runner)[m
+[32m+[m[32m- `coverage.py` (code coverage)[m
+[32m+[m[32m- `ruff` (linter and formatter)[m
+[32m+[m[32m- `mypy` (type checker)[m
+[32m+[m
+[32m+[m[32mOrchestration tools:[m
+[32m+[m
+[32m+[m[32m- Configuration for `pre-commit` is in the `./.pre-commit-config.yaml` file.[m
+[32m+[m[32m- Configuration for `tox` is in `./tox.ini`.[m
+[32m+[m[32m- Configuration for GitHub Actions (CI) is in files inside `./.github/workflows/`.[m
+[32m+[m
+[32m+[m[32m### Contributions[m
+[32m+[m
+[32m+[m[32mPlease have a look at the [contributions file][contributing].[m
+[32m+[m
+[32m+[m[32m### INFRASTRUCTURE[m
+[32m+[m
+[32m+[m[32m- [User Documentation](http://gitpython.readthedocs.org)[m
+[32m+[m[32m- [Questions and Answers](http://stackexchange.com/filters/167317/gitpython)[m
+[32m+[m[32m- Please post on Stack Overflow and use the `gitpython` tag[m
+[32m+[m[32m- [Issue Tracker](https://github.com/gitpython-developers/GitPython/issues)[m
+[32m+[m[32m  - Post reproducible bugs and feature requests as a new issue.[m
+[32m+[m[32m    Please be sure to provide the following information if posting bugs:[m
+[32m+[m[32m    - GitPython version (e.g. `import git; git.__version__`)[m
+[32m+[m[32m    - Python version (e.g. `python --version`)[m
+[32m+[m[32m    - The encountered stack-trace, if applicable[m
+[32m+[m[32m    - Enough information to allow reproducing the issue[m
+[32m+[m
+[32m+[m[32m### How to make a new release[m
+[32m+[m
+[32m+[m[32m1. Update/verify the **version** in the `VERSION` file.[m
+[32m+[m[32m2. Update/verify that the `doc/source/changes.rst` changelog file was updated. It should include a link to the forthcoming release page: `https://github.com/gitpython-developers/GitPython/releases/tag/<version>`[m
+[32m+[m[32m3. Commit everything.[m
+[32m+[m[32m4. Run `git tag -s <version>` to tag the version in Git.[m
+[32m+[m[32m5. _Optionally_ create and activate a [virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment). (Then the next step can install `build` and `twine`.)[m
+[32m+[m[32m6. Run `make release`.[m
+[32m+[m[32m7. Go to [GitHub Releases](https://github.com/gitpython-developers/GitPython/releases) and publish a new one with the recently pushed tag. Generate the changelog.[m
+[32m+[m
+[32m+[m[32m### Projects using GitPython[m
+[32m+[m
+[32m+[m[32m- [PyDriller](https://github.com/ishepard/pydriller)[m
+[32m+[m[32m- [Kivy Designer](https://github.com/kivy/kivy-designer)[m
+[32m+[m[32m- [Prowl](https://github.com/nettitude/Prowl)[m
+[32m+[m[32m- [Python Taint](https://github.com/python-security/pyt)[m
+[32m+[m[32m- [Buster](https://github.com/axitkhurana/buster)[m
+[32m+[m[32m- [git-ftp](https://github.com/ezyang/git-ftp)[m
+[32m+[m[32m- [Git-Pandas](https://github.com/wdm0006/git-pandas)[m
+[32m+[m[32m- [PyGitUp](https://github.com/msiemens/PyGitUp)[m
+[32m+[m[32m- [PyJFuzz](https://github.com/mseclab/PyJFuzz)[m
+[32m+[m[32m- [Loki](https://github.com/Neo23x0/Loki)[m
+[32m+[m[32m- [Omniwallet](https://github.com/OmniLayer/omniwallet)[m
+[32m+[m[32m- [GitViper](https://github.com/BeayemX/GitViper)[m
+[32m+[m[32m- [Git Gud](https://github.com/bthayer2365/git-gud)[m
+[32m+[m
+[32m+[m[32m### LICENSE[m
+[32m+[m
+[32m+[m[32m[3-Clause BSD License](https://opensource.org/license/bsd-3-clause/), also known as the New BSD License. See the [LICENSE file][license].[m
+[32m+[m
+[32m+[m[32m[contributing]: https://github.com/gitpython-developers/GitPython/blob/main/CONTRIBUTING.md[m
+[32m+[m[32m[license]: https://github.com/gitpython-developers/GitPython/blob/main/LICENSE[m
+[1mdiff --git a/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/RECORD b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/RECORD[m
+[1mnew file mode 100644[m
+[1mindex 0000000..78504f6[m
+[1m--- /dev/null[m
+[1m+++ b/.venv/Lib/site-packages/GitPython-3.1.43.dist-info/RECORD[m
+[36m@@ -0,0 +1,82 @@[m
+[32m+[m[32mGitPython-3.1.43.dist-info/AUTHORS,sha256=h1TlPKfp05GA1eKQ15Yl4biR0C0FgivuGSeRA6Q1dz0,2286[m
+[32m+[m[32mGitPython-3.1.43.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4[m
+[32m+[m[32mGitPython-3.1.43.dist-info/LICENSE,sha256=hvyUwyGpr7wRUUcTURuv3tIl8lEA3MD3NQ6CvCMbi-s,1503[m
+[32m+[m[32mGitPython-3.1.43.dist-info/METADATA,sha256=sAh3r1BMVw5_olGgDmpMS69zBpVr7UEOeRivNHKznfU,13376[m
+[32m+[m[32mGitPython-3.1.43.dist-info/RECORD,,[m
+[32m+[m[32mGitPython-3.1.43.dist-info/WHEEL,sha256=GJ7t_kWBFywbagK5eo9IoUwLW6oyOeTKmQ-9iHFVNxQ,92[m
+[32m+[m[32mGitPython-3.1.43.dist-info/top_level.txt,sha256=0hzDuIp8obv624V3GmbqsagBWkk8ohtGU-Bc1PmTT0o,4[m
+[32m+[m[32mgit/__init__.py,sha256=w6fnS0QmwTfEFUSL6rfnpP0lUId2goSguZFOvVX3N3U,8899[m
+[32m+[m[32mgit/__pycache__/__init__.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/cmd.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/compat.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/config.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/db.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/diff.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/exc.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/remote.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/types.cpython-312.pyc,,[m
+[32m+[m[32mgit/__pycache__/util.cpython-312.pyc,,[m
+[32m+[m[32mgit/cmd.py,sha256=qd-gIHSk4mfsYjd9YA08cPyO8TMxaibTXAbFnHK71uc,67659[m
+[32m+[m[32mgit/compat.py,sha256=y1E6y6O2q5r8clSlr8ZNmuIWG9nmHuehQEsVsmBffs8,4526[m
+[32m+[m[32mgit/config.py,sha256=Ald8Xc-G9Shcgx3QCISyXTkL4a6nbc3qll-xUw4YdyY,34924[m
+[32m+[m[32mgit/db.py,sha256=vIW9uWSbqu99zbuU2ZDmOhVOv1UPTmxrnqiCtRHCfjE,2368[m
+[32m+[m[32mgit/diff.py,sha256=IE5aeHL7aP9yxBluYj06IX8nZjoJ_TOM3gG31-Evf_8,27058[m
+[32m+[m[32mgit/exc.py,sha256=Gc7g1pHpn8OmTse30NHmJVsBJ2CYH8LxaR8y8UA3lIM,7119[m
+[32m+[m[32mgit/index/__init__.py,sha256=i-Nqb8Lufp9aFbmxpQBORmmQnjEVVM1Pn58fsQkyGgQ,406[m
+[32m+[m[32mgit/index/__pycache__/__init__.cpython-312.pyc,,[m
+[32m+[m[32mgit/index/__pycache__/base.cpython-312.pyc,,[m
+[32m+[m[32mgit/index/__pycache__/fun.cpython-312.pyc,,[m
+[32m+[m[32mgit/index/__pycache__/typ.cpython-312.pyc,,[m
+[32m+[m[32mgit/index/__pycache__/util.cpython-312.pyc,,[m
+[32m+[m[32mgit/index/base.py,sha256=A4q4cN_Ifxi8CsAR-7h4KsQ2d3JazBNFZ1ltbAKttgs,60734[m
+[32m+[m[32mgit/index/fun.py,sha256=37cA3DBC9vpAnSVu5TGA072SnoF5XZOkOukExwlejHs,16736[m
+[32m+[m[32mgit/index/typ.py,sha256=uuKNwitUw83FhVaLSwo4pY7PHDQudtZTLJrLGym4jcI,6570[m
+[32m+[m[32mgit/index/util.py,sha256=fULi7GPG-MvprKrRCD5c15GNdzku_1E38We0d97WB3A,3659[m
+[32m+[m[32mgit/objects/__init__.py,sha256=O6ZL_olX7e5-8iIbKviRPkVSJxN37WA-EC0q9d48U5Y,637[m
+[32m+[m[32mgit/objects/__pycache__/__init__.cpython-312.pyc,,[m
+[32m+[m[32mgit/objects/__pycache__/base.cpython-312.pyc,,[m
+[32m+[m[32mgit/objects/__pycache__/blob.cpython-312.pyc,,[m
+[32m+[m[32mgit/objects/__pycache__/commit.cpython-312.pyc,,[m
+[32m+[m[32mgit/objects/__pycache__/fun.cpython-312.pyc,,[m
+[32m+[m[32mgit/objects/__pycache__/tag.cpython-312.pyc,,[m
+[32m+[m[32mgit/

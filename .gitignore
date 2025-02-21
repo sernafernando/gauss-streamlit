@@ -1,0 +1,12 @@
+# Ignorar la carpeta completa 'carpeta_no_subir'
+.venv/
+
+# Ignorar archivos específicos en una carpeta
+*.xlsx
+*.csv
+bk*.py
+*.xml
+streamlit/secrets.toml
+
+# Ignorar todos los archivos con una extensión específica
+*.log
