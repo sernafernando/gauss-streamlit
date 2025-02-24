@@ -893,7 +893,7 @@ df_group = filtered_df.copy()
 # Línea separadora
 
 df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
-df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum', 'Marca': 'first', 'Categoría': 'first', 'SubCategoría': 'first'})
+df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
 
 # Aplicamos la función y formateamos el resultado.
 df_groupbybrand['MarkUp'] = df_groupbybrand.apply(markupear, axis=1)
@@ -913,28 +913,6 @@ df_final = df_groupbyitem.merge(df_ageing_unique[['Código', 'Ageing']],
 
 df_final.drop(columns='Código', inplace=True)
 
-# Cambiar temporalmente los nombres de las columnas para que sean únicos
-df_final_renamed = df_final.rename(columns={
-    'Marca': 'brand',
-    'SubCategoría': 'subcat',
-    'Categoría': 'cat',
-    'Descripción': 'item_desc'
-})
-
-dynamic_filters2 = DynamicFilters(df_filter, filters=['brand','subcat','cat', 'item_desc'])
-
-dynamic_filters2.display_filters(location='columns', num_columns=4, gap='small')
-
-filtered_df2 = dynamic_filters.filter_df(except_filter='None')
-
-# Restaurar los nombres originales de las columnas después de aplicar el filtro
-df_final_filtered = filtered_df2.rename(columns={
-    'brand': 'Marca',
-    'subcat': 'SubCategoría',
-    'cat': 'Categoría',
-    'item_desc': 'Descripción'
-})
-
 
 with st.expander("Agrupado por Productos:"):
-    st.dataframe(df_final_filtered)
+    st.dataframe(df_final)
