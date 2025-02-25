@@ -353,7 +353,7 @@ data_prices = {
 }
 2
 data_prices_feb_25 = {
-    'pricelist': [4, 5, 17, 14, 13, 23, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22,6],
+    'pricelist2': [4, 5, 17, 14, 13, 23, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22,6],
     1: [15.5, None, 22.9, 27.4, 32, 36.5, None, 4.83, 13.73, 19.73, 24.73, 15.5, 24.4, 30.4, 35.4, 41, 30.33,29.5],
     2: [12.15, None, 19.55, 24.05, 28.65, 33.15, None, 4.83, 13.73, 19.73, 24.73, 12.15, 21.05, 27.05, 32.55, 37.65, 30.33,26.15],
     3: [12.65, None, 20.05, 24.55, 29.15, 33.65, None, 4.83, 13.73, 19.73, 24.73, 12.65, 21.55, 27.55, 32.55, 38.15, 30.33,26.65],
@@ -389,6 +389,7 @@ df_merged = df_merged.merge(
 
 # Eliminamos pricelist
 df_merged.drop(columns=['pricelist'], inplace=True)
+df_merged.drop(columns=['pricelist2'], inplace=True)
 
 # Calculamos la comisión en pesos
 if df_merged['Fecha'].dt.month == 2 and df_merged['Fecha'].dt.day == 24:
