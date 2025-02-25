@@ -318,7 +318,7 @@ data_subcat = {
 if len(data_subcat['subcat_id']) == len(data_subcat['group']):
     df_subcat = pd.DataFrame(data_subcat)
 else:
-    print("Las listas no tienen la misma longitud. Ajusta los datos. Filho da puta.")
+    print("Las listas no tienen la misma longitud. Ajusta los datos.")
 
 # Asegúrate de que ambas columnas 'subcat_id' sean del mismo tipo (int)
 df['subcat_id'] = df['subcat_id'].astype(int)
@@ -352,11 +352,25 @@ data_prices = {
     8: [16, None, 24.9, 30.9, 35.9, 41.5, None, 4.83, 13.73, 19.73, 24.73, 16, 24.9, 30.9, 35.9, 41.5, 30.33,30]
 }
 
+data_prices_feb_25 = {
+    'pricelist': [4, 5, 17, 14, 13, 23, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22,6],
+    1: [15.5, None, 22.9, 27.4, 32, 36.5, None, 4.83, 13.73, 19.73, 24.73, 15.5, 24.4, 30.4, 35.4, 41, 30.33,29.5],
+    2: [12.15, None, 19.55, 24.05, 28.65, 33.15, None, 4.83, 13.73, 19.73, 24.73, 12.15, 21.05, 27.05, 32.55, 37.65, 30.33,26.15],
+    3: [12.65, None, 20.05, 24.55, 29.15, 33.65, None, 4.83, 13.73, 19.73, 24.73, 12.65, 21.55, 27.55, 32.55, 38.15, 30.33,26.65],
+    4: [13.65, None, 21.05, 25.55, 30.15, 34.65, None, 4.83, 13.73, 19.73, 24.73, 13.65, 22.55, 28.55, 33.55, 39.15, 30.33,27.65],
+    5: [14, None, 21.4, 25.9, 30.5, 35, None, 4.83, 13.73, 19.73, 24.73, 14, 22.9, 28.9, 33.9, 39.5, 30.33,28],
+    6: [14.5, None, 21.9, 26.4, 31, 35.5, None, 4.83, 13.73, 19.73, 24.73, 14.5, 23.4, 29.4, 34.4, 40, 30.33,28.5],
+    7: [15, None, 22.4, 26.9, 31.5, 36, None, 4.83, 13.73, 19.73, 24.73, 15, 23.9, 29.9, 34.9, 40.5, 30.33,29],
+    8: [16, None, 23.4, 27.9, 32.5, 37, None, 4.83, 13.73, 19.73, 24.73, 16, 24.9, 30.9, 35.9, 41.5, 30.33,30]
+}
+
 # Crear DataFrame de precios
 df_prices = pd.DataFrame(data_prices)
+df_prices_feb_25 = pd.DataFrame(data_prices_feb_25)
 
 # Primero, asegurémonos de que la columna 'pricelist' en df_prices sea un valor único para los precios.
 df_prices_melted = df_prices.melt(id_vars='pricelist', var_name='subcat_id', value_name='Comisión')
+df_prices_feb_25_melted = df_prices_feb_25.melt(id_vars='pricelist', var_name='subcat_id', value_name='Comisión_feb_25')
 
 # Ahora, fusionamos df_merged con df_prices_melted
 df_merged = df_merged.merge(
@@ -366,20 +380,37 @@ df_merged = df_merged.merge(
     how='left'
 )
 
+df_merged = df_merged.merge(
+    df_prices_feb_25_melted,
+    left_on=['priceList', 'subcat_id'],
+    right_on=['pricelist', 'subcat_id'],
+    how='left'
+)
+
 # Eliminamos pricelist
 df_merged.drop(columns=['pricelist'], inplace=True)
 
 # Calculamos la comisión en pesos
-
-df_merged['Comisión en pesos'] = np.where(
-    df_merged['Monto_Unitario'] >= min_free,
-    (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
-    np.where(
-        df_merged['Monto_Unitario'] < min_fijo,
-        (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
-        (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
+if df_merged['Fecha'].dt.month == 2 and df_merged['Fecha'].dt.day == 24:
+    df_merged['Comisión en pesos'] = np.where(
+        df_merged['Monto_Unitario'] >= min_free,
+        (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+        np.where(
+            df_merged['Monto_Unitario'] < min_fijo,
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
+        )
     )
-)
+else: 
+    df_merged['Comisión en pesos'] = np.where(
+        df_merged['Monto_Unitario'] >= min_free,
+        (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+        np.where(
+            df_merged['Monto_Unitario'] < min_fijo,
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
+        )
+    )
 
 df_merged['Costo envío'] = np.where(
     df_merged['ML_logistic_type'] == 'self_service',
