@@ -394,10 +394,10 @@ df_merged = df_merged.merge(
 df_merged.drop(columns=['pricelist'], inplace=True)
 df_merged.drop(columns=['pricelist2'], inplace=True)
 
-print(df_merged['original_date'].limit(5))
 # Calculamos la comisión en pesos
-if df_merged['original_date'].dt.month == 2 and df_merged['original_date'].dt.day == 24:
-    df_merged['Comisión en pesos'] = np.where(
+df_merged['Comisión en pesos'] = np.where(
+    (df_merged['original_date'].dt.month == 2) & (df_merged['original_date'].dt.day == 24),
+    np.where(
         df_merged['Monto_Unitario'] >= min_free,
         (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
         np.where(
@@ -405,9 +405,8 @@ if df_merged['original_date'].dt.month == 2 and df_merged['original_date'].dt.da
             (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
             (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
         )
-    )
-else: 
-    df_merged['Comisión en pesos'] = np.where(
+    ),
+    np.where(
         df_merged['Monto_Unitario'] >= min_free,
         (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
         np.where(
@@ -416,6 +415,7 @@ else:
             (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
         )
     )
+)
 
 df_merged.drop(columns=['original_date'], inplace=True)
 df_merged['Costo envío'] = np.where(
