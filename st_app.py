@@ -351,7 +351,7 @@ data_prices = {
     7: [15, None, 23.9, 29.9, 34.9, 40.5, None, 4.83, 13.73, 19.73, 24.73, 15, 23.9, 29.9, 34.9, 40.5, 30.33,29],
     8: [16, None, 24.9, 30.9, 35.9, 41.5, None, 4.83, 13.73, 19.73, 24.73, 16, 24.9, 30.9, 35.9, 41.5, 30.33,30]
 }
-
+2
 data_prices_feb_25 = {
     'pricelist': [4, 5, 17, 14, 13, 23, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22,6],
     1: [15.5, None, 22.9, 27.4, 32, 36.5, None, 4.83, 13.73, 19.73, 24.73, 15.5, 24.4, 30.4, 35.4, 41, 30.33,29.5],
@@ -370,7 +370,7 @@ df_prices_feb_25 = pd.DataFrame(data_prices_feb_25)
 
 # Primero, asegurémonos de que la columna 'pricelist' en df_prices sea un valor único para los precios.
 df_prices_melted = df_prices.melt(id_vars='pricelist', var_name='subcat_id', value_name='Comisión')
-df_prices_feb_25_melted = df_prices_feb_25.melt(id_vars='pricelist', var_name='subcat_id', value_name='Comisión_feb_25')
+df_prices_feb_25_melted = df_prices_feb_25.melt(id_vars='pricelist2', var_name='subcat_id2', value_name='Comisión_feb_25')
 
 # Ahora, fusionamos df_merged con df_prices_melted
 df_merged = df_merged.merge(
