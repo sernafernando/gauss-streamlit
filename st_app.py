@@ -296,10 +296,10 @@ for column in columnas_sin_comas:
 
 # Formatear fecha a formato dd/mm/aaaa hh:mm:ss
 # Convertir la columna de fechas, manejando fechas con o sin microsegundos
-df['original_date'] = df['Fecha']
+
 
 df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
-
+df['original_date'] = df['Fecha']
 
 # Formatear las fechas en un formato más legible
 df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
