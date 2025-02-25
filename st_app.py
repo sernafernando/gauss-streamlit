@@ -394,6 +394,7 @@ df_merged = df_merged.merge(
 df_merged.drop(columns=['pricelist'], inplace=True)
 df_merged.drop(columns=['pricelist2'], inplace=True)
 
+print(df_merged['original_date'].limit(5))
 # Calculamos la comisión en pesos
 if df_merged['original_date'].dt.month == 2 and df_merged['original_date'].dt.day == 24:
     df_merged['Comisión en pesos'] = np.where(
