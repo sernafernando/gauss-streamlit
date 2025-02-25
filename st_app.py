@@ -383,7 +383,7 @@ df_merged = df_merged.merge(
 df_merged = df_merged.merge(
     df_prices_feb_25_melted,
     left_on=['priceList', 'subcat_id'],
-    right_on=['pricelist', 'subcat_id'],
+    right_on=['pricelist2', 'subcat_id2'],
     how='left'
 )
 
