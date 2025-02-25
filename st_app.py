@@ -296,8 +296,10 @@ for column in columnas_sin_comas:
 
 # Formatear fecha a formato dd/mm/aaaa hh:mm:ss
 # Convertir la columna de fechas, manejando fechas con o sin microsegundos
+
 df['Fecha'] = pd.to_datetime(df['Fecha'], errors='coerce')
 
+df['original_date'] = df['Fecha']
 # Formatear las fechas en un formato más legible
 df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
 
@@ -392,7 +394,7 @@ df_merged.drop(columns=['pricelist'], inplace=True)
 df_merged.drop(columns=['pricelist2'], inplace=True)
 
 # Calculamos la comisión en pesos
-if df_merged['Fecha'].dt.month == 2 and df_merged['Fecha'].dt.day == 24:
+if df_merged['original_date'].dt.month == 2 and df_merged['original_date'].dt.day == 24:
     df_merged['Comisión en pesos'] = np.where(
         df_merged['Monto_Unitario'] >= min_free,
         (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
@@ -413,6 +415,7 @@ else:
         )
     )
 
+df_merged.drop(columns=['original_date'], inplace=True)
 df_merged['Costo envío'] = np.where(
     df_merged['ML_logistic_type'] == 'self_service',
     df_merged['mlp_price4FreeShipping'], df_merged['mlp_price4FreeShipping']
