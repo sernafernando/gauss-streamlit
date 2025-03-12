@@ -422,12 +422,12 @@ df_merged['Comisión en pesos'] = np.where(
         )
     ),
     np.where(
-        df_merged['Monto_Unitario'] >= min_free,
+        df_merged['Monto_Unitario'] >= 30000,
         (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
         np.where(
-            df_merged['Monto_Unitario'] < min_fijo,
-            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
-            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
+            df_merged['Monto_Unitario'] < 12000,
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (900 / 1.21)) * df_merged['Cantidad'],
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (1800 / 1.21)) * df_merged['Cantidad']
         )
     )
 )
