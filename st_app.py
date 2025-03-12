@@ -57,10 +57,12 @@ with st.sidebar:
         to_date = today
 
     with st.expander("Parámetros"):
-        min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=12000)
-        min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=30000)
-        valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=900)
-        valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=1800)
+        min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=15000)
+        max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=24000)
+        min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=33000)
+        valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=1000)
+        valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=1800)
+        valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=2400)
         varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=7)
         from_date = st.date_input("Escriba fecha de inicio", value=from_date)
         to_date = st.date_input("Escriba fecha de fin", value=to_date)
@@ -397,13 +399,26 @@ df_merged.drop(columns=['pricelist2'], inplace=True)
 # Calculamos la comisión en pesos
 df_merged['Comisión en pesos'] = np.where(
     df_merged['original_date'] >= pd.Timestamp("2025-02-26"),
-    np.where(
-        df_merged['Monto_Unitario'] >= min_free,
-        (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+    np.where(df_merged['original_date'] >= pd.Timestamp("2025-03-11"),
         np.where(
-            df_merged['Monto_Unitario'] < min_fijo,
-            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
-            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad']
+            df_merged['Monto_Unitario'] >= 30000,
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+            np.where(
+                df_merged['Monto_Unitario'] < 12000,
+                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (900 / 1.21)) * df_merged['Cantidad'],
+                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (1800 / 1.21)) * df_merged['Cantidad']
+            )
+        ),
+        np.where(
+            df_merged['Monto_Unitario'] >= min_free,
+            (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+            np.where(
+                df_merged['Monto_Unitario'] < min_fijo,
+                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
+                np.where(df_merged['Monto_Unitario'] < max_fijo,
+                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_max_fijo / 1.21)) * df_merged['Cantidad'],
+                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad'])
+            )
         )
     ),
     np.where(
