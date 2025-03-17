@@ -647,7 +647,7 @@ with col_header[0]:
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_container_width=True)
+    st.image(image="images/white-g-logo.png",use_column_width=True)
 
 #  Verificar que la fecha de inicio no sea mayor a la fecha de fin
 if from_date > to_date:
