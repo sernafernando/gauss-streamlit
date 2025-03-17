@@ -79,6 +79,7 @@ with st.sidebar:
     main_page = st.page_link("st_app.py",label="Dashboard",icon="🏠")
     ventas_page = st.page_link("pages/02ventas_ml.py",label="Ventas ML",icon="📈")
     ageing_page = st.page_link("pages/03ageing.py",label="Ageing",icon="⌛")
+    fuera_page = st.page_link("pages/04ventas_por_fuera.py",label="Ventas por fuera",icon="📈")
 
 
 

@@ -17,7 +17,7 @@ from st_app import LargeXMLHandler
 from pygwalker.api.streamlit import StreamlitRenderer
 
 # Set page config
-st.set_page_config(page_title="Gauss Online | Ageing", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Gauss Online | Ventas ML", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
 
 st.logo(image="images/white-g-logo.png", 
         icon_image="images/white-g.png")
@@ -67,7 +67,7 @@ with st.sidebar:
         st.cache_data.clear()  # Borra la caché de la función
     
     st.markdown("---")
-    
+
     st.markdown("##### Seleccione la página:")
     main_page = st.page_link("st_app.py",label="Dashboard",icon="🏠")
     ventas_page = st.page_link("pages/02ventas_ml.py",label="Ventas ML",icon="📈")
@@ -85,7 +85,7 @@ from_date = st.session_state.from_date
 to_date = st.session_state.to_date
 
 @st.cache_data
-def ageing():
+def ventas_por_fuera():
     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Header>
@@ -99,7 +99,7 @@ def ageing():
     </soap:Header>
     <soap:Body>
             <wsGBPScriptExecute4Dataset xmlns="http://microsoft.com/webservices/">
-                <strScriptLabel>scriptAgeing</strScriptLabel>
+                <strScriptLabel>scriptVentasFuera2</strScriptLabel>
                 <strJSonParameters>{{"fromDate": "{from_date}", "toDate": "{to_date}"}}</strJSonParameters>
             </wsGBPScriptExecute4Dataset>
         </soap:Body>
@@ -145,82 +145,28 @@ def ageing():
     df = pd.DataFrame(column1_list)
     return df
 
-df_ageing = ageing()
-df_ageing_unique = df_ageing.drop_duplicates(subset=["Código"])
-
-def top_10_gen(df, col1, col2, label1, label2, title, color_bar='#83c9ff'):
-    top_10 = df.nlargest(10, col2)
-
-    # Renombrar la columna 'columna' a 'label'
-    top_10 = top_10.rename(columns={col2: label2, col1: label1})
-
-    # Verificar los datos antes de graficar
-    if (top_10[label2] < 0).any():
-        print("Hay valores negativos en la columna:", top_10[label2][top_10[label2] < 0])
-
-    # Ordenar por el valor de 'label2' de mayor a menor
-    top_10 = top_10.sort_values(by=label2, ascending=False)
-
-    # Crear el gráfico usando nombres completos para los valores
-    fig = px.bar(top_10, y=top_10[label1], x=top_10[label2],
-                 title=title,
-                 orientation='h',
-                 color_discrete_sequence=[color_bar])  # Gráfico horizontal
-
-    # Truncar los nombres de productos largos solo para la visualización en el eje Y
-    truncated_names = [(name[:25] + '...') if len(name) > 25 else name for name in top_10[label1]]
-
-    # Actualizar el gráfico para usar los nombres truncados en el eje Y
-    fig.update_layout(yaxis_tickvals=top_10[label1],
-                      yaxis_ticktext=truncated_names, 
-                      yaxis=dict(categoryorder='total ascending'))  # Invertir el orden en el eje Y
-
-
-
-    st.plotly_chart(fig)
-
+df_ventas_ml = ventas_ml()
 
 
 # Main Page
 col_overheader = st.columns(3)
-col_header = st.columns(2)
+col_header = st.columns(3)
 
 with col_header[0]:
     """
-    # Ageing de productos
-    Con publicaciones activas y/o pausadas.
+    # Ventas ML
+    Consulta de Ventas ML
 
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_column_width=True)
+    st.image(image="images/white-g-logo.png",use_container_width=True)
 
-df_ageing_active = df_ageing_unique[(df_ageing_unique['Activa'] != False)]
-df_ageing_90 = df_ageing_unique[(df_ageing_unique['Ageing'] > 90)]
-df_ageing_deactive = df_ageing_unique[(df_ageing_unique['Activa'] == False)]
-
-
-col_underheader = st.columns(3)
-
-with col_underheader[0]:
-    top_10_gen(df_ageing_90, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', '10 Productos con mayor stock con más de 90 días','#6b8eb2')
-with col_underheader[1]:
-    top_10_gen(df_ageing_active, 'Descripción', 'Ageing', 'Producto', 'Ageing', 'Top 10 Productos Activos con mayor Ageing', '#99ccff')
-with col_underheader[2]:
-    top_10_gen(df_ageing_deactive, 'Descripción', 'Stock_Disponible', 'Producto', 'Stock Disponible', 'Top 10 Productos Pausados con mayor Stock','#6b8eb2')
-
-with st.expander("Ageing Activas"):
-    df_ageing_active
-
-with st.expander("Ageing Pausadas"):
-    df_ageing_deactive
-
-with st.expander("Ageing completo"): 
-    df_ageing_unique
+df_ventas_ml
 
 @st.cache_resource
 def get_pyg_renderer() -> "StreamlitRenderer":
-    df = df_ageing_unique
+    df = df_ventas_ml
     # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
     return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
 

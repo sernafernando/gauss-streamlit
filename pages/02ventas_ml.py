@@ -50,10 +50,12 @@ with st.sidebar:
         to_date = today
 
     with st.expander("Parámetros"):
-        min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=12000)
-        min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=30000)
-        valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=900)
-        valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=1800)
+        min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=15000)
+        max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=24000)
+        min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=33000)
+        valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=1000)
+        valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=2000)
+        valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=2400)
         varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=7)
         from_date = st.date_input("Escriba fecha de inicio", value=from_date)
         to_date = st.date_input("Escriba fecha de fin", value=to_date)
@@ -70,6 +72,7 @@ with st.sidebar:
     main_page = st.page_link("st_app.py",label="Dashboard",icon="🏠")
     ventas_page = st.page_link("pages/02ventas_ml.py",label="Ventas ML",icon="📈")
     ageing_page = st.page_link("pages/03ageing.py",label="Ageing",icon="⌛")
+    fuera_page = st.page_link("pages/04ventas_por_fuera.py",label="Ventas por fuera",icon="📈")
 
 pusername = st.secrets["api"]["username"]
 ppassword = st.secrets["api"]["password"]
