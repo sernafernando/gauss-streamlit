@@ -145,7 +145,7 @@ def ventas_por_fuera():
     df = pd.DataFrame(column1_list)
     return df
 
-df_ventas_ml = ventas_ml()
+df_ventas_por_fuera = ventas_por_fuera()
 
 
 # Main Page
@@ -162,11 +162,12 @@ with col_header[0]:
 with col_overheader[2]:
     st.image(image="images/white-g-logo.png",use_container_width=True)
 
-df_ventas_ml
+df_ventas_por_fuera
 
 @st.cache_resource
 def get_pyg_renderer() -> "StreamlitRenderer":
-    df = df_ventas_ml
+    df = df_ventas_por_fuera
+
     # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
     return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
 
