@@ -147,6 +147,46 @@ def ventas_por_fuera():
 
 df_ventas_por_fuera = ventas_por_fuera()
 
+df_ventas_por_fuera['Fecha'] = pd.to_datetime(df_ventas_por_fuera['Fecha'], errors='coerce')
+
+# Formatear las fechas en un formato más legible
+df_ventas_por_fuera['Fecha'] = df_ventas_por_fuera['Fecha'].dt.strftime('%d/%m/%Y %H:%M:%S')
+
+
+
+df_ventas_por_fuera['Ganancia'] = (df_ventas_por_fuera['Precio_Final_sin_IVA'] - df_ventas_por_fuera['Costo_Pesos_sin_IVA']) - df_ventas_por_fuera['Precio_Final_sin_IVA']*0.05
+df_ventas_por_fuera['MarkUp'] = np.where(df_ventas_por_fuera['Costo_Pesos_sin_IVA'] < 0, (((df_ventas_por_fuera['Precio_Final_sin_IVA']- df_ventas_por_fuera['Precio_Final_sin_IVA']*0.05) / df_ventas_por_fuera['Costo_Pesos_sin_IVA'] )-1) * -100,
+    (df_ventas_por_fuera['Precio_Final_sin_IVA'] / df_ventas_por_fuera['Costo_Pesos_sin_IVA'] )-1) * 100
+
+def total_ventas_sin_iva(df):
+    total_ventas_sin_iva = df['Precio_Final_sin_IVA'].sum()
+    return total_ventas_sin_iva
+
+def total_costo_sin_iva(df):
+    total_costo_sin_iva = df['Costo_Pesos_sin_IVA'].sum()
+    return total_costo_sin_iva
+
+def calcular_ganancia(df):
+    total_ganancia = df['Ganancia'].sum()
+    return total_ganancia
+
+def calcular_markup(df):
+    markup = (total_ventas_sin_iva(df) / total_costo_sin_iva(df)-1) * 100
+    return markup
+
+# Formatear los totales
+total_limpio = df_ventas_por_fuera[df_ventas_por_fuera['Fecha'].notna()]['Precio_Final_sin_IVA'].sum()
+total_costo = df_ventas_por_fuera[df_ventas_por_fuera['Fecha'].notna()]['Costo_Pesos_sin_IVA'].sum()
+total_markup = ((total_limpio / total_costo)-1)*100
+total_ganancia = total_limpio - total_costo
+
+totales = {
+    "Total Ventas": f"$ {total_limpio:,.0f}".replace(',', '.'),
+    "Total Ganancia": f"$ {total_ganancia:,.0f}".replace(',', '.'),
+    "Total Markup": f"{total_markup:,.2f}%".replace(',', '.')
+}
+
+
 
 # Main Page
 col_overheader = st.columns(3)
@@ -160,7 +200,18 @@ with col_header[0]:
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_container_width=True)
+    st.image(image="images/white-g-logo.png",use_column_width=True)
+
+col_over_envios = st.columns(3)
+col_under_envios = st.columns(3)
+
+with col_under_envios[0]:
+    st.markdown("#### Total Periodo:")
+    with st.container(border=True):
+        st.metric("Total Limpio", f"$ {total_limpio:,.0f}".replace(',', '.'))  # Muestra el total_limpio
+        st.metric("Total Costo", f"$ {total_costo:,.0f}".replace(',', '.'))  # Muestra el total_costo
+        st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
+        st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 
 df_ventas_por_fuera
 
