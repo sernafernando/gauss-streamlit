@@ -193,7 +193,7 @@ with col_header[0]:
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_column_width=True)
+    st.image(image="images/white-g-logo.png",use_container_width=True)
 
 df_ageing_active = df_ageing_unique[(df_ageing_unique['Activa'] != False)]
 df_ageing_90 = df_ageing_unique[(df_ageing_unique['Ageing'] > 90)]
