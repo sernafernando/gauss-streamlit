@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from st_app import LargeXMLHandler
 from pygwalker.api.streamlit import StreamlitRenderer
+from streamlit_dynamic_filters import DynamicFilters
+
 
 # Set page config
 st.set_page_config(page_title="Gauss Online | Ventas ML", page_icon="images/white-g.png", layout="wide", initial_sidebar_state="expanded")
@@ -174,17 +176,12 @@ def calcular_markup(df):
     markup = (total_ventas_sin_iva(df) / total_costo_sin_iva(df)-1) * 100
     return markup
 
-# Formatear los totales
-total_limpio = df_ventas_por_fuera[df_ventas_por_fuera['Fecha'].notna()]['Precio_Final_sin_IVA'].sum()
-total_costo = df_ventas_por_fuera[df_ventas_por_fuera['Fecha'].notna()]['Costo_Pesos_sin_IVA'].sum()
-total_markup = ((total_limpio / total_costo)-1)*100
-total_ganancia = total_limpio - total_costo
+if from_date > to_date:
+    st.error("La fecha de inicio no puede ser mayor a la fecha de fin.")
+else:
+    st.success(f"Consultando datos desde {from_date} hasta {to_date}")
 
-totales = {
-    "Total Ventas": f"$ {total_limpio:,.0f}".replace(',', '.'),
-    "Total Ganancia": f"$ {total_ganancia:,.0f}".replace(',', '.'),
-    "Total Markup": f"{total_markup:,.2f}%".replace(',', '.')
-}
+
 
 
 
@@ -194,16 +191,80 @@ col_header = st.columns(3)
 
 with col_header[0]:
     """
-    # Ventas ML
-    Consulta de Ventas ML
+    # Ventas por Fuera
+    Consulta de Ventas por fuera
 
     """
 
 with col_overheader[2]:
-    st.image(image="images/white-g-logo.png",use_column_width=True)
+    st.image(image="images/white-g-logo.png",use_container_width=True)
+
+# Filtro por 'Marca' en el DataFrame
+unique_brands = df_ventas_por_fuera['Marca'].unique()
+sorted_brands = sorted(unique_brands)
+
+    
+st.write("Aplicar los filtros en cualquier orden 👇")
+col_selectbox = st.columns(5)
+
+# Filtrar por marca seleccionada
+df_outside_filter = df_ventas_por_fuera.copy()
+# Filtrar el DataFrame en base a las fechas seleccionadas
+
+# Asegurarse de que las columnas de fechas estén en formato datetime
+df_outside_filter['Fecha'] = pd.to_datetime(df_outside_filter['Fecha'], errors='coerce', format="%d/%m/%Y %H:%M:%S")
+
+
+# Crear dos entradas de fecha
+with col_selectbox[0]:
+    start_date = st.date_input("Fecha inicial:", value=df_outside_filter['Fecha'].min())
+    
+
+with col_selectbox[1]:
+    end_date = st.date_input("Fecha final:", value=df_outside_filter['Fecha'].max() + timedelta(days=1))
+
+
+
+with col_selectbox[4]:
+        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
+
+
+df_outside_filter = df_outside_filter[(df_outside_filter['Fecha'] >= pd.to_datetime(start_date)) & 
+                      (df_outside_filter['Fecha'] <= pd.to_datetime(end_date))]
+
+
+filtro_monto_total = df_outside_filter['Precio_Final_sin_IVA'].sum()
+
+last_day = df_outside_filter['Fecha'].max() + timedelta(days=1)
+day_before = last_day - pd.Timedelta(days=1)  # Obtener la fecha de ayer
+
+dynamic_filters = DynamicFilters(df_outside_filter, filters=['Marca','SubCategoría','Categoría', 'Descripción'])
+
+dynamic_filters.display_filters(location='columns', num_columns=4, gap='small')
+
+outside_filtered_df = dynamic_filters.filter_df(except_filter='None')
+
+#with col_selectbox[2]:
+#    st.markdown("")
+#    st.markdown("")
+#    st.button("Limpiar Filtros", on_click=dynamic_filters.reset_filters())
+
+filtro_monto_total = outside_filtered_df
 
 col_over_envios = st.columns(3)
 col_under_envios = st.columns(3)
+
+# Formatear los totales
+total_limpio = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Precio_Final_sin_IVA'].sum()
+total_costo = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Costo_Pesos_sin_IVA'].sum()
+total_markup = ((total_limpio / total_costo)-1)*100
+total_ganancia = total_limpio - total_costo
+
+totales = {
+    "Total Ventas": f"$ {total_limpio:,.0f}".replace(',', '.'),
+    "Total Ganancia": f"$ {total_ganancia:,.0f}".replace(',', '.'),
+    "Total Markup": f"{total_markup:,.2f}%".replace(',', '.')
+}
 
 with col_under_envios[0]:
     st.markdown("#### Total Periodo:")
@@ -213,7 +274,8 @@ with col_under_envios[0]:
         st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
         st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 
-df_ventas_por_fuera
+
+filtro_monto_total
 
 @st.cache_resource
 def get_pyg_renderer() -> "StreamlitRenderer":
