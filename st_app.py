@@ -939,9 +939,9 @@ filtered_df = df_filter[st.session_state.selected_columns]
 
 
 # Mostrar el DataFrame filtrado
-with st.expander("DataFrame filtrado:"):
-    st.dataframe(filtered_df)
-
+#with st.expander("DataFrame filtrado:"):
+#    st.dataframe(filtered_df)
+st.dataframe(filtered_df)
 
 df_group = filtered_df.copy()
 # Línea separadora
@@ -970,15 +970,3 @@ df_final.drop(columns='Código', inplace=True)
 
 with st.expander("Agrupado por Productos:"):
     st.dataframe(df_final)
-
-@st.cache_resource
-def get_pyg_renderer() -> "StreamlitRenderer":
-    df = df_filter
-
-    # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
-    return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
-
-renderer = get_pyg_renderer()
-
-with st.expander("Generar grafico"):
-    renderer.explorer()
