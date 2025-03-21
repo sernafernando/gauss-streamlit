@@ -14,6 +14,7 @@ import io
 import matplotlib.pyplot as plt
 import plotly.express as px
 from streamlit_dynamic_filters import DynamicFilters
+from pygwalker.api.streamlit import StreamlitRenderer
  
 
 # Set page config
