@@ -159,6 +159,7 @@ df_ventas_por_fuera['Fecha'] = df_ventas_por_fuera['Fecha'].dt.strftime('%d/%m/%
 df_ventas_por_fuera['Ganancia'] = (df_ventas_por_fuera['Precio_Final_sin_IVA'] - df_ventas_por_fuera['Costo_Pesos_sin_IVA']) - df_ventas_por_fuera['Precio_Final_sin_IVA']*0.05
 df_ventas_por_fuera['MarkUp'] = np.where(df_ventas_por_fuera['Costo_Pesos_sin_IVA'] < 0, (((df_ventas_por_fuera['Precio_Final_sin_IVA']- df_ventas_por_fuera['Precio_Final_sin_IVA']*0.05) / df_ventas_por_fuera['Costo_Pesos_sin_IVA'] )-1) * -100,
     (df_ventas_por_fuera['Precio_Final_sin_IVA'] / df_ventas_por_fuera['Costo_Pesos_sin_IVA'] )-1) * 100
+df_ventas_por_fuera['Costo_Pesos_con_IVA'] = df_ventas_por_fuera['Costo_Pesos_sin_IVA'] * (1 + df_ventas_por_fuera["IVA"] / 100)
 
 def total_ventas_sin_iva(df):
     total_ventas_sin_iva = df['Precio_Final_sin_IVA'].sum()
@@ -181,6 +182,25 @@ if from_date > to_date:
 else:
     st.success(f"Consultando datos desde {from_date} hasta {to_date}")
 
+def display_top_10_gen(df, col1, col2, label1, label2):
+# Agrupar por 'Marca' y sumar 'Monto_Total'
+    df_grouped = df.groupby(col1, as_index=False)[col2].sum()
+
+    # Filtrar las 10 marcas con más facturación
+    top_10 = df_grouped.nlargest(10, col2)
+
+    # Renombrar la columna 'Monto_Total' a 'Facturación ML'
+    top_10 = top_10.rename(columns={col2: label2,col1: label1})
+
+    # Truncar los nombres de productos largos
+    top_10[label1] = top_10[label1].apply(lambda x: x[:25] + '...' if len(x) > 25 else x)
+
+
+    # Crear el gráfico
+    fig = px.bar(top_10, x=label1, y=label2,
+             title=f'Top 10 {label1}s por {label2}')
+    
+    st.plotly_chart(fig)
 
 
 
@@ -225,18 +245,15 @@ with col_selectbox[1]:
 
 
 
-with col_selectbox[4]:
-        seleccionar_grafico_filtrado = st.selectbox("Elegir gráfico:", ["Top 10 Marcas por Facturación","Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación","Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
-
-
 df_outside_filter = df_outside_filter[(df_outside_filter['Fecha'] >= pd.to_datetime(start_date)) & 
                       (df_outside_filter['Fecha'] <= pd.to_datetime(end_date))]
 
 
-filtro_monto_total = df_outside_filter['Precio_Final_sin_IVA'].sum()
+#filtro_monto_total = df_outside_filter['Precio_Final_sin_IVA'].sum()
 
-last_day = df_outside_filter['Fecha'].max() + timedelta(days=1)
-day_before = last_day - pd.Timedelta(days=1)  # Obtener la fecha de ayer
+
+day_before = df_outside_filter['Fecha'].max()
+last_day = day_before + timedelta(days=1)
 
 dynamic_filters = DynamicFilters(df_outside_filter, filters=['Marca','SubCategoría','Categoría', 'Descripción'])
 
@@ -257,23 +274,84 @@ col_under_envios = st.columns(3)
 # Formatear los totales
 total_limpio = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Precio_Final_sin_IVA'].sum()
 total_costo = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Costo_Pesos_sin_IVA'].sum()
+total_ventas_con_IVA = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Precio_Final_con_IVA'].sum()
+total_costo_con_IVA = filtro_monto_total[filtro_monto_total['Fecha'].notna()]['Costo_Pesos_con_IVA'].sum()
 total_markup = ((total_limpio / total_costo)-1)*100
 total_ganancia = total_limpio - total_costo
+total_markup_con_iva = ((total_ventas_con_IVA / total_costo_con_IVA)-1)*100
+total_ganancia_con_iva = total_ventas_con_IVA - total_costo_con_IVA
 
 totales = {
     "Total Ventas": f"$ {total_limpio:,.0f}".replace(',', '.'),
     "Total Ganancia": f"$ {total_ganancia:,.0f}".replace(',', '.'),
     "Total Markup": f"{total_markup:,.2f}%".replace(',', '.')
 }
-
-with col_under_envios[0]:
+with col_over_envios[1]:
+    center_selector = st.selectbox("Seleccionar como se expresan los montos:", ["Precios con IVA", "Precios sin IVA"])
+with col_under_envios[1]:
     st.markdown("#### Total Periodo:")
-    with st.container(border=True):
-        st.metric("Total Limpio", f"$ {total_limpio:,.0f}".replace(',', '.'))  # Muestra el total_limpio
-        st.metric("Total Costo", f"$ {total_costo:,.0f}".replace(',', '.'))  # Muestra el total_costo
-        st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
-        st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
+    if center_selector == "Precios sin IVA":
+        with st.container(border=True):
+            st.metric("Facturación Total Sin IVA", f"$ {total_limpio:,.0f}".replace(',', '.'))  # Muestra el total_limpio
+            st.metric("Costos Totales Sin IVA", f"$ {total_costo:,.0f}".replace(',', '.'))  # Muestra el total_costo
+            st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
+            st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
+    elif center_selector == "Precios con IVA":
+        with st.container(border=True):
+            st.metric("Facturación Total Con IVA", f"$ {total_ventas_con_IVA:,.0f}".replace(',', '.'))  # Muestra el total_limpio
+            st.metric("Costos Totales Con IVA", f"$ {total_costo_con_IVA:,.0f}".replace(',', '.'))  # Muestra el total_costo
+            st.metric("Total Ganancia", f"$ {total_ganancia_con_iva:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
+            st.metric("Total Markup", f"{total_markup_con_iva:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 
+expresion_iva = "Precio_Final_con_IVA"
+label_iva = "Facturación c/IVA"
+
+if center_selector == "Precios sin IVA":
+    expresion_iva = "Precio_Final_sin_IVA"
+    label_iva = "Facturación s/IVA"
+elif center_selector == "Precio con IVA":
+    expresion_iva = "Precio_Final_con_IVA"
+    label_iva = "Facturación c/IVA"
+
+with col_over_envios[0]:
+    left_graphic = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas","Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación", "Top 10 Productos por Facturación"])
+with col_under_envios[0]:
+    if left_graphic == "Top 10 SubCategoría por Facturación":
+        display_top_10_gen(filtro_monto_total, 'SubCategoría', expresion_iva, 'SubCategoría', label_iva)
+    elif left_graphic == "Top 10 Categoría por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Categoría', expresion_iva, 'Categoría', label_iva)
+    elif left_graphic == "Top 10 Marcas por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Marca', expresion_iva, 'Marca', label_iva)
+    elif left_graphic == "Top 10 Productos por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Descripción', expresion_iva, 'Producto', label_iva)
+    elif left_graphic == "Top 10 Marcas por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Marca', 'Cantidad', 'Marca', 'Unidades Vendidas')
+    elif left_graphic == "Top 10 SubCategoría por Ventas":
+        display_top_10_gen(filtro_monto_total, 'SubCategoría', 'Cantidad', 'SubCategoría', 'Unidades Vendidas')    
+    elif left_graphic == "Top 10 Categoría por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Categoría', 'Cantidad', 'Categoría', 'Unidades Vendidas')
+    elif left_graphic == "Top 10 Productos por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Descripción', 'Cantidad', 'Producto', 'Unidades Vendidas')
+
+with col_over_envios[2]:
+    seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación", "Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
+with col_under_envios[2]:
+    if seleccionar_grafico == "Top 10 SubCategoría por Facturación":
+        display_top_10_gen(filtro_monto_total, 'SubCategoría', expresion_iva, 'SubCategoría', label_iva)
+    elif seleccionar_grafico == "Top 10 Categoría por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Categoría', expresion_iva, 'Categoría', label_iva)
+    elif seleccionar_grafico == "Top 10 Marcas por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Marca', expresion_iva, 'Marca', label_iva)
+    elif seleccionar_grafico == "Top 10 Productos por Facturación":
+        display_top_10_gen(filtro_monto_total, 'Descripción', expresion_iva, 'Producto', label_iva)
+    elif seleccionar_grafico == "Top 10 Marcas por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Marca', 'Cantidad', 'Marca', 'Unidades Vendidas')
+    elif seleccionar_grafico == "Top 10 SubCategoría por Ventas":
+        display_top_10_gen(filtro_monto_total, 'SubCategoría', 'Cantidad', 'SubCategoría', 'Unidades Vendidas')    
+    elif seleccionar_grafico == "Top 10 Categoría por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Categoría', 'Cantidad', 'Categoría', 'Unidades Vendidas')
+    elif seleccionar_grafico == "Top 10 Productos por Ventas":
+        display_top_10_gen(filtro_monto_total, 'Descripción', 'Cantidad', 'Producto', 'Unidades Vendidas')
 
 filtro_monto_total
 

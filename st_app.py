@@ -969,3 +969,15 @@ df_final.drop(columns='Código', inplace=True)
 
 with st.expander("Agrupado por Productos:"):
     st.dataframe(df_final)
+
+@st.cache_resource
+def get_pyg_renderer() -> "StreamlitRenderer":
+    df = df_ventas_por_fuera
+
+    # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
+    return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
+
+renderer = get_pyg_renderer()
+
+with st.expander("Generar grafico"):
+    renderer.explorer()
