@@ -973,7 +973,7 @@ with st.expander("Agrupado por Productos:"):
 
 @st.cache_resource
 def get_pyg_renderer() -> "StreamlitRenderer":
-    df = df_ventas_por_fuera
+    df = df_filter
 
     # If you want to use feature of saving chart config, set `spec_io_mode="rw"`
     return StreamlitRenderer(df, spec="./gw_config.json", spec_io_mode="rw")
