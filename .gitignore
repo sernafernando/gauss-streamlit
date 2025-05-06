@@ -1,15 +1,22 @@
 # Ignorar la carpeta completa 'carpeta_no_subir'
 .venv/
 .sql/
+<<<<<<< HEAD
 .devcontainer/
 __pycache__/
+=======
+>>>>>>> d31233be9df9190ef14f3ca07fa397dc78471cf6
 
 # Ignorar archivos específicos en una carpeta
 *.xlsx
 *.csv
 bk*.py
 *.xml
+<<<<<<< HEAD
 .streamlit/secrets.toml
+=======
+streamlit/secrets.toml
+>>>>>>> d31233be9df9190ef14f3ca07fa397dc78471cf6
 
 
 # Ignorar todos los archivos con una extensión específica
