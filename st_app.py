@@ -240,69 +240,69 @@ else:
     authenticate()
 
     df = dashboard()
-    @st.cache_data
-    def ageing():
-        xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
-        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-        <soap:Header>
-            <wsBasicQueryHeader xmlns="http://microsoft.com/webservices/">
-                <pUsername>{pusername}</pUsername>
-                <pPassword>{ppassword}</pPassword>
-                <pCompany>{pcompany}</pCompany>
-                <pWebWervice>{pwebwervice}</pWebWervice>
-                <pAuthenticatedToken>{token}</pAuthenticatedToken>
-            </wsBasicQueryHeader>
-        </soap:Header>
-        <soap:Body>
-                <wsGBPScriptExecute4Dataset xmlns="http://microsoft.com/webservices/">
-                    <strScriptLabel>scriptAgeing</strScriptLabel>
-                    <strJSonParameters>{{"fromDate": "{from_date}", "toDate": "{to_date}"}}</strJSonParameters>
-                </wsGBPScriptExecute4Dataset>
-            </soap:Body>
-        </soap:Envelope>'''
+    # @st.cache_data
+    # def ageing():
+    #     xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
+    #     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    #     <soap:Header>
+    #         <wsBasicQueryHeader xmlns="http://microsoft.com/webservices/">
+    #             <pUsername>{pusername}</pUsername>
+    #             <pPassword>{ppassword}</pPassword>
+    #             <pCompany>{pcompany}</pCompany>
+    #             <pWebWervice>{pwebwervice}</pWebWervice>
+    #             <pAuthenticatedToken>{token}</pAuthenticatedToken>
+    #         </wsBasicQueryHeader>
+    #     </soap:Header>
+    #     <soap:Body>
+    #             <wsGBPScriptExecute4Dataset xmlns="http://microsoft.com/webservices/">
+    #                 <strScriptLabel>scriptAgeing</strScriptLabel>
+    #                 <strJSonParameters>{{"fromDate": "{from_date}", "toDate": "{to_date}"}}</strJSonParameters>
+    #             </wsGBPScriptExecute4Dataset>
+    #         </soap:Body>
+    #     </soap:Envelope>'''
         
-        header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
-        response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
+    #     header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
+    #     response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
 
-        if response.status_code != 200:
-            print(f"Error en la solicitud: {response.status_code}")
-            return
+    #     if response.status_code != 200:
+    #         print(f"Error en la solicitud: {response.status_code}")
+    #         return
 
-        print("Consulta a la API exitosa")
+    #     print("Consulta a la API exitosa")
         
-        # Creamos el parser y el manejador
-        parser = xml.sax.make_parser()
-        handler = LargeXMLHandler()
-        parser.setContentHandler(handler)
+    #     # Creamos el parser y el manejador
+    #     parser = xml.sax.make_parser()
+    #     handler = LargeXMLHandler()
+    #     parser.setContentHandler(handler)
         
-        # Parseamos el XML
-        xml_content = response.content
-        xml.sax.parseString(xml_content, handler)
+    #     # Parseamos el XML
+    #     xml_content = response.content
+    #     xml.sax.parseString(xml_content, handler)
 
-        # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
-        result_content = ''.join(handler.result_content)
+    #     # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
+    #     result_content = ''.join(handler.result_content)
 
-        # Procesar el JSON que está dentro de <Column1>
-        unescaped_result = html.unescape(result_content)
-        match = re.search(r'\[.*?\]', unescaped_result)
+    #     # Procesar el JSON que está dentro de <Column1>
+    #     unescaped_result = html.unescape(result_content)
+    #     match = re.search(r'\[.*?\]', unescaped_result)
         
-        if match:
-            column1_json = match.group(0)
-        else:
-            print("No se encontró contenido JSON en Column1.")
-            return
+    #     if match:
+    #         column1_json = match.group(0)
+    #     else:
+    #         print("No se encontró contenido JSON en Column1.")
+    #         return
 
-        try:
-            column1_list = json.loads(column1_json)
-        except json.JSONDecodeError as e:
-            print(f"Error al decodificar el JSON: {e}")
+    #     try:
+    #         column1_list = json.loads(column1_json)
+    #     except json.JSONDecodeError as e:
+    #         print(f"Error al decodificar el JSON: {e}")
 
         
-        df = pd.DataFrame(column1_list)
-        return df
+    #     df = pd.DataFrame(column1_list)
+    #     return df
 
-    df_ageing = ageing()
-    df_ageing_unique = df_ageing.drop_duplicates(subset=["Código"])
+    #df_ageing = ageing()
+    #df_ageing_unique = df_ageing.drop_duplicates(subset=["Código"])
 
 
     #if not df.empty:
@@ -983,11 +983,9 @@ else:
     with st.expander("Agrupado por Marcas:"):
         st.dataframe(df_groupbybrand)
 
-    df_final = df_groupbyitem.merge(df_ageing_unique[['Código', 'Ageing']], 
-                                    left_on='Código_Item', right_on='Código', 
-                                    how='left')
+    df_final = df_groupbyitem
 
-    df_final.drop(columns='Código', inplace=True)
+    df_final.drop(columns='Código_Item', inplace=True)
 
 
     with st.expander("Agrupado por Productos:"):
