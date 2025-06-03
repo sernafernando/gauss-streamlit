@@ -222,6 +222,9 @@ with col_overheader[2]:
 # Filtro por 'Marca' en el DataFrame
 unique_brands = df_ventas_por_fuera['Marca'].unique()
 sorted_brands = sorted(unique_brands)
+sellers = df_ventas_por_fuera['Vendedor'].unique()    
+sorted_sellers = sorted(sellers)
+# sorted_sellers = ['TODOS'] + sorted_sellers
 
     
 st.write("Aplicar los filtros en cualquier orden 👇")
@@ -243,12 +246,16 @@ with col_selectbox[0]:
 with col_selectbox[1]:
     end_date = st.date_input("Fecha final:", value=df_outside_filter['Fecha'].max() + timedelta(days=1))
 
+with col_selectbox[4]:
+    select_seller = st.multiselect('Selecciona vendedores:', sorted_sellers, default=sorted_sellers)
 
 
 df_outside_filter = df_outside_filter[(df_outside_filter['Fecha'] >= pd.to_datetime(start_date)) & 
                       (df_outside_filter['Fecha'] <= pd.to_datetime(end_date))]
 
-
+print(select_seller)
+if select_seller != 'TODOS':
+    df_outside_filter = df_outside_filter[df_outside_filter['Vendedor'].isin(select_seller)]
 #filtro_monto_total = df_outside_filter['Precio_Final_sin_IVA'].sum()
 
 
