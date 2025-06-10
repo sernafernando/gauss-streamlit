@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 from streamlit_dynamic_filters import DynamicFilters
 from pygwalker.api.streamlit import StreamlitRenderer
+import time
  
 
 # Set page config
@@ -177,6 +178,7 @@ else:
 
     @st.cache_data
     def dashboard():
+        column1_list = [] 
         xml_payload = f'''<?xml version="1.0" encoding="utf-8"?>
         <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Header>
@@ -197,44 +199,109 @@ else:
         </soap:Envelope>'''
         
         header_ws = {"Content-Type": "text/xml", "muteHttpExceptions": "true"}
-        response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws)
+        # Define el tiempo máximo de espera en segundos.
+        # Si AppScript tarda 22 segundos, un valor de 30 a 45 segundos es un buen punto de partida.
+        REQUEST_TIMEOUT_SECONDS = 60 
 
-        if response.status_code != 200:
-            print(f"Error en la solicitud: {response.status_code}")
-            return
+        try:
+            # Aquí es donde se añade el parámetro 'timeout' a la solicitud POST
+            response = requests.post(url_ws, data=xml_payload.encode('utf-8'), headers=header_ws, timeout=REQUEST_TIMEOUT_SECONDS)
+            response.raise_for_status() # Lanza una excepción para códigos de estado de error (4xx o 5xx)
+        except requests.exceptions.Timeout:
+            # Maneja específicamente el error de tiempo de espera
+            st.error(f"La solicitud al endpoint excedió el tiempo límite de {REQUEST_TIMEOUT_SECONDS} segundos. El servidor tardó demasiado en responder.")
+            print(f"ERROR: Timeout al conectar con el endpoint después de {REQUEST_TIMEOUT_SECONDS}s.")
+            return pd.DataFrame() # Retorna un DataFrame vacío para no detener la aplicación
+        except requests.exceptions.RequestException as e:
+            # Maneja otros errores de solicitud HTTP (ej. conexión, DNS, etc.)
+            st.error(f"Error en la solicitud al endpoint: {e}")
+            print(f"ERROR: Error de Request: {e}")
+            return pd.DataFrame() # Retorna un DataFrame vacío
 
         print("Consulta a la API exitosa")
+
+        print("\n--- INICIO RESPUESTA COMPLETA DEL SERVIDOR ---")
+        print(response.text) # Imprime el contenido de la respuesta como texto
+        print("--- FIN RESPUESTA COMPLETA DEL SERVIDOR ---\n")
         
-        # Creamos el parser y el manejador
+         # 1. Parseo XML con SAX
         parser = xml.sax.make_parser()
-        handler = LargeXMLHandler()
+        handler = LargeXMLHandler() 
         parser.setContentHandler(handler)
-        
-        # Parseamos el XML
         xml_content = response.content
-        xml.sax.parseString(xml_content, handler)
 
-        # Obtenemos el contenido de wsGBPScriptExecute4DatasetResult
+        parse_xml_start = time.time()
+        try:
+            xml.sax.parseString(xml_content, handler)
+        except xml.sax.SAXParseException as e:
+            st.error(f"Error al parsear el XML de la respuesta: {e}")
+            print(f"ERROR: Error de parseo XML: {e}")
+            print(f"DEBUG: Contenido XML problemático: {xml_content.decode('utf-8')[:500]}...")
+            return pd.DataFrame()
+        except Exception as e:
+            st.error(f"Error inesperado al parsear el XML: {e}")
+            print(f"ERROR: Error inesperado en el parseo XML: {e}")
+            return pd.DataFrame()
+        parse_xml_end = time.time()
+        print(f"DEBUG: Tiempo de parseo SAX XML (xml.sax.parseString): {parse_xml_end - parse_xml_start:.2f} segundos")
+        print(f"DEBUG: Longitud de xml_content: {len(xml_content)} bytes")
+
+
+        # 2. Unir el contenido extraído por el handler
+        join_content_start = time.time()
         result_content = ''.join(handler.result_content)
+        join_content_end = time.time()
+        print(f"DEBUG: Tiempo de unir handler.result_content (''.join): {join_content_end - join_content_start:.2f} segundos")
+        print(f"DEBUG: Longitud de result_content: {len(result_content)} caracteres")
 
-        # Procesar el JSON que está dentro de <Column1>
+        # 3. Desescapar entidades HTML
+        unescape_start = time.time()
         unescaped_result = html.unescape(result_content)
-        match = re.search(r'\[.*?\]', unescaped_result)
+        unescape_end = time.time()
+        print(f"DEBUG: Tiempo de html.unescape: {unescape_end - unescape_start:.2f} segundos")
+        print(f"DEBUG: Longitud de unescaped_result: {len(unescaped_result)} caracteres")
+
+
+        # 4. Buscar el JSON con Regex
+        regex_search_start = time.time()
+        match = re.search(r'\[.*\]', unescaped_result, re.DOTALL)
+        regex_search_end = time.time()
+        print(f"DEBUG: Tiempo de búsqueda regex (re.search): {regex_search_end - regex_search_start:.2f} segundos")
         
         if match:
             column1_json = match.group(0)
+            print(f"DEBUG: Longitud de column1_json (JSON extraído): {len(column1_json)} caracteres")
+            
+            # Muestra los primeros y los ÚLTIMOS 200 caracteres de la cadena JSON
+            print(f"DEBUG: INICIO JSON EXTRAIDO (primeros 200 chars):\n{column1_json[:200]}\n") 
+            print(f"DEBUG: FIN JSON EXTRAIDO (ultimos 200 chars):\n...{column1_json[-200:]}\n") 
+
+            try:
+                column1_list = json.loads(column1_json) 
+            except json.JSONDecodeError as e:
+                st.error(f"Error al decodificar el JSON: {e}. El final de la cadena JSON es: ...{column1_json[-500:]}") # Muestra más del final
+                print(f"ERROR: Error al decodificar el JSON: {e}")
+                # Ya no imprimimos la cadena completa, solo el final
+                print(f"DEBUG: Fin de la cadena JSON problemática: {column1_json[-500:]}") 
+                return pd.DataFrame() 
         else:
-            print("No se encontró contenido JSON en Column1.")
-            return
-
-        try:
-            column1_list = json.loads(column1_json)
-        except json.JSONDecodeError as e:
-            print(f"Error al decodificar el JSON: {e}")
-
+            st.warning("No se encontró contenido JSON de tipo array ([...]) en la respuesta del script.")
+            print(f"ADVERTENCIA: No se encontró contenido JSON en Column1. Contenido unescaped: {unescaped_result[:500]}...")
+            return pd.DataFrame()
         
-        df = pd.DataFrame(column1_list)
-        return df
+        # 6. Crear el DataFrame de Pandas
+        df_creation_start = time.time()
+        try:
+            df = pd.DataFrame(column1_list)
+            df_creation_end = time.time()
+            print(f"DEBUG: Tiempo de creación de DataFrame (pd.DataFrame): {df_creation_end - df_creation_start:.2f} segundos")
+            print(f"DEBUG: DataFrame creado con {df.shape[0]} filas y {df.shape[1]} columnas.")
+            return df
+        except ValueError as e:
+            st.error(f"Error al crear el DataFrame de Pandas: {e}. Asegúrate de que los datos tienen el formato correcto (lista de diccionarios o lista de listas).")
+            print(f"ERROR: Error al crear DataFrame: {e}")
+            print(f"DEBUG: Contenido de column1_list que causó el error: {column1_list[:50]}...")
+            return pd.DataFrame()
 
 
     authenticate()
