@@ -13,7 +13,6 @@ import numpy as np
 import io
 import matplotlib.pyplot as plt
 import plotly.express as px
-from st_app import LargeXMLHandler
 from pygwalker.api.streamlit import StreamlitRenderer
 
 # Set page config
@@ -83,6 +82,26 @@ url_ws = st.secrets["api"]["url_ws"]
 token = st.session_state.token
 from_date = st.session_state.from_date
 to_date = st.session_state.to_date
+
+class LargeXMLHandler(xml.sax.ContentHandler):
+        def __init__(self):
+            self.result_content = []
+            self.is_in_result = False
+
+        def startElement(self, name, attrs):
+            # Cuando el parser encuentra el inicio de un elemento
+            if name == 'wsGBPScriptExecute4DatasetResult':
+                self.is_in_result = True
+
+        def endElement(self, name):
+            # Cuando el parser encuentra el final de un elemento
+            if name == 'wsGBPScriptExecute4DatasetResult':
+                self.is_in_result = False
+
+        def characters(self, content):
+            # Al encontrar contenido de texto dentro de un nodo
+            if self.is_in_result:
+                self.result_content.append(content)
 
 @st.cache_data
 def ageing():
