@@ -239,7 +239,7 @@ with col_overheader[2]:
     st.image(image="images/white-g-logo.png",use_container_width=True)
 
 # Filtro por 'Marca' en el DataFrame
-unique_brands = df_ventas_por_fuera['Marca'].unique()
+unique_brands = df_ventas_por_fuera['Marca'].dropna().astype(str).unique()
 sorted_brands = sorted(unique_brands)
 sellers = df_ventas_por_fuera['Vendedor'].unique()    
 sorted_sellers = sorted(sellers)
@@ -281,8 +281,10 @@ if select_seller != 'TODOS':
 day_before = df_outside_filter['Fecha'].max()
 last_day = day_before + timedelta(days=1)
 
-dynamic_filters = DynamicFilters(df_outside_filter, filters=['Marca','SubCategoría','Categoría', 'Descripción'])
+cols = ['Marca', 'SubCategoría', 'Categoría', 'Descripción']
+df_outside_filter[cols] = df_outside_filter[cols].astype(str)
 
+dynamic_filters = DynamicFilters(df_outside_filter, filters=cols)
 dynamic_filters.display_filters(location='columns', num_columns=4, gap='small')
 
 outside_filtered_df = dynamic_filters.filter_df(except_filter='None')
