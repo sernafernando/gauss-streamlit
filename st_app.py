@@ -87,7 +87,7 @@ else:
             valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=1000)
             valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=2000)
             valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=2400)
-            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=7)
+            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=5.5)
             from_date = st.date_input("Escriba fecha de inicio", value=from_date)
             to_date = st.date_input("Escriba fecha de fin", value=to_date)
 
@@ -407,7 +407,7 @@ else:
     # subcat to group
     data_subcat = {
         'subcat_id': [3821,3820,3882,3819,3818,3885,3879,3869,3870,3919,3915,3841,3858,3922,3860,3861,3902,3866,3856,3893,3886,3887,3924,3921,3920,3912,3913,3878,3875,3876,3880,3894,3853,3931,3926,3891,3843,3918,3849,3888,3852,3899,3838,3895,3896,3957,3907],
-        'group': [2,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,7,7,7,7,8,8,8,8,8,8,3,3]
+        'group': [2,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,7,7,7,7,7,8,8,8,8,8,8,3,3]
     }
 
     # Verificación de longitudes
@@ -487,57 +487,76 @@ else:
     df_merged.drop(columns=['pricelist'], inplace=True)
     df_merged.drop(columns=['pricelist2'], inplace=True)
 
+
+    # Declaro las varibles para purgar las fórmulas
+    unitario_sin_iva = df_merged['Monto_Unitario'] / (1 + df_merged['IVA']/100)
+    total_sin_iva = df_merged['Monto_Total'] / (1 + df_merged['IVA']/100)
+    cantidad = df_merged['Cantidad']
+    comision_febrero = df_merged['Comisión_feb_25'] / 100
+    comision_vieja = df_merged['Comisión'] / 100
+    comision_febrero_sin_iva = comision_febrero / 1.21
+    comision_vieja_sin_iva = comision_vieja / 1.21
+    varios_sin_iva = total_sin_iva * (varios_percent / 100)
+    valor_fijo_sin_iva = valor_fijo / 1.21
+    valor_max_fijo_sin_iva = valor_max_fijo / 1.21
+    valor_free_sin_iva = valor_free / 1.21
+    min_viejo_sin_iva = 900 / 1.21
+    max_viejo_sin_iva = 1800 / 1.21
+    
+
+    df_merged['Monto_Unitario_sin_iva'] = unitario_sin_iva
+    df_merged['Monto_Total_sin_IVA'] = total_sin_iva
+    
+
     # Calculamos la comisión en pesos
-    df_merged['Comisión en pesos'] = np.where(
-        df_merged['original_date'] >= pd.Timestamp("2025-02-26"),
+    df_merged['Comisión en pesos'] = np.where(df_merged['original_date'] >= pd.Timestamp("2025-02-26"),
         np.where(df_merged['original_date'] >= pd.Timestamp("2025-03-11"),
-            np.where(
-                df_merged['Monto_Unitario'] >= 30000,
-                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
-                np.where(
-                    df_merged['Monto_Unitario'] < 12000,
-                    (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (900 / 1.21)) * df_merged['Cantidad'],
-                    (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (1800 / 1.21)) * df_merged['Cantidad']
-                )
-            ),
-            np.where(
-                df_merged['Monto_Unitario'] >= min_free,
-                (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
-                np.where(
-                    df_merged['Monto_Unitario'] < min_fijo,
-                    (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_fijo / 1.21)) * df_merged['Cantidad'],
+            np.where(df_merged['Monto_Unitario'] >= min_free,
+                (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva)  * cantidad) + varios_sin_iva),
+                np.where(df_merged['Monto_Unitario'] < min_fijo,
+                    (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_fijo_sin_iva) * cantidad) + varios_sin_iva,
                     np.where(df_merged['Monto_Unitario'] < max_fijo,
-                    (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_max_fijo / 1.21)) * df_merged['Cantidad'],
-                    (df_merged['Monto_Unitario'] * (((df_merged['Comisión_feb_25'] / 100) / 1.21) + (varios_percent / 100)) + (valor_free / 1.21)) * df_merged['Cantidad'])
+                        (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_max_fijo_sin_iva) * cantidad) + varios_sin_iva ,
+                        (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_free_sin_iva) * cantidad) + varios_sin_iva,
+                    )
+                )                 
+            ),
+            np.where(df_merged['Monto_Unitario'] >= 30000,
+                (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva) * cantidad) + varios_sin_iva),
+                np.where(df_merged['Monto_Unitario'] < 12000,
+                    (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva) + min_viejo_sin_iva) * cantidad) + varios_sin_iva,
+                    (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva) + max_viejo_sin_iva) * cantidad) + varios_sin_iva 
                 )
             )
         ),
-        np.where(
-            df_merged['Monto_Unitario'] >= 30000,
-            (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100))) * df_merged['Cantidad'],
+        np.where(df_merged['Monto_Unitario'] >= 30000,
+            (((df_merged['Monto_Unitario'] * comision_vieja_sin_iva) * cantidad) + varios_sin_iva),
             np.where(
                 df_merged['Monto_Unitario'] < 12000,
-                (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (900 / 1.21)) * df_merged['Cantidad'],
-                (df_merged['Monto_Unitario'] * (((df_merged['Comisión'] / 100) / 1.21) + (varios_percent / 100)) + (1800 / 1.21)) * df_merged['Cantidad']
+                (((df_merged['Monto_Unitario'] * comision_vieja_sin_iva) + min_viejo_sin_iva * cantidad) + varios_sin_iva),
+                (((df_merged['Monto_Unitario'] * comision_vieja_sin_iva) + max_viejo_sin_iva * cantidad) + varios_sin_iva)
             )
         )
     )
+    
+
 
     df_merged.drop(columns=['original_date'], inplace=True)
     df_merged['Costo envío'] = np.where(
         df_merged['ML_logistic_type'] == 'self_service',
         df_merged['mlp_price4FreeShipping'], df_merged['mlp_price4FreeShipping']
     )
-
+    
+    costo_envio_sin_iva = df_merged['Costo envío'] / 1.21
     # Crea una columna auxiliar con la cuenta de cada 'ML_pack_id'
     #df_merged['contar_si'] = df_merged.groupby('ML_pack_id')['ML_pack_id'].transform('count')
 
     def limpiar(row):
         if pd.isnull(row['ML_pack_id']):  # Verifica si ML_pack_id está vacío
-            return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad'])  - row['Comisión en pesos']
+            return ((row['Monto_Unitario'] / (1+row['IVA']/100)) * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
         else:
             #contar_si = row['contar_si']  # Utiliza el valor de 'contar_si' calculado por cada fila
-            return (row['Monto_Unitario'] * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
+            return ((row['Monto_Unitario'] / (1+row['IVA']/100)) * row['Cantidad']) - ((row['Costo envío'] / 1.21)*row['Cantidad']) - row['Comisión en pesos']
 
 
     # Aplicar la función a cada fila y guardar el resultado en una nueva columna
@@ -556,9 +575,9 @@ else:
     # Calculamos el MarkUp
     def markupear(row):
         # Manejar división por cero y valores nulos
-        if row['costo_total_iva'] == 0 or pd.isnull(row['costo_total_iva']):
+        if row['costo_total'] == 0 or pd.isnull(row['costo_total']):
             return None  # O un valor adecuado que prefieras
-        return ((row['Limpio'] / row['costo_total_iva']) - 1) * 100
+        return ((row['Limpio'] / row['costo_total']) - 1) * 100
 
     def calcular_flex(df):
         total_operaciones = df[df['Fecha'].notna()]['Limpio'].count()
@@ -748,8 +767,8 @@ else:
     # Definir las métricas a mostrar
     # Formatear los totales
     total_limpio = df_merged[df_merged['Fecha'].notna()]['Limpio'].sum()
-    total_costo = df_merged[df_merged['Fecha'].notna()]['costo_total_iva'].sum()
-    total_ventas_ml = df_merged[df_merged['Fecha'].notna()]['Monto_Total'].sum()
+    total_costo = df_merged[df_merged['Fecha'].notna()]['costo_total'].sum()
+    total_ventas_ml = df_merged[df_merged['Fecha'].notna()]['Monto_Total_sin_IVA'].sum()
     total_comision = df_merged[df_merged['Fecha'].notna()]['Comisión en pesos'].sum()
     total_markup = ((total_limpio / total_costo)-1)*100
     total_ganancia = total_limpio - total_costo
@@ -896,7 +915,7 @@ else:
 
     # Formatear los totales
     total_limpio_filtered = df_filter['Limpio'].sum()
-    total_costo_filtered = df_filter['costo_total_iva'].sum()
+    total_costo_filtered = df_filter['costo_total'].sum()
     total_comision_filtered = df_filter['Comisión en pesos'].sum()
     total_markup_filtered = ((total_limpio_filtered / total_costo_filtered) - 1) * 100
     total_venta_ml_filtered = df_filter['Monto_Total'].sum()
@@ -1001,7 +1020,7 @@ else:
         # Inicializa el estado de la sesión si no existe
         if 'selected_columns' not in st.session_state:
             # Aquí se especifican las columnas que deben estar seleccionadas por defecto
-            st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp","costo_total_iva","Costo envío"]  # Empieza vacío para que todas estén destildadas
+            st.session_state.selected_columns = ["Fecha", "Marca", "Categoría","SubCategoría","Código_Item","Descripción","Cantidad","Monto_Unitario","Monto_Total","IVA","Costo en pesos","Comisión", "Comisión en pesos","Limpio","MarkUp","costo_total","Costo envío"]  # Empieza vacío para que todas estén destildadas
 
         # Título de la aplicación
         st.subheader("Seleccionar las columnas a visualizar")
@@ -1035,8 +1054,8 @@ else:
     df_group = filtered_df.copy()
     # Línea separadora
 
-    df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
-    df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total_iva': 'sum'})
+    df_groupbybrand = df_group.groupby(['Marca'], as_index=False).agg({'Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total': 'sum'})
+    df_groupbyitem = df_group.groupby(['Código_Item'], as_index=False).agg({'Descripción': 'first','Cantidad': 'sum','Monto_Total': 'sum','Limpio': 'sum','Costo en pesos': 'sum','Costo envío': 'sum', 'costo_total': 'sum'})
 
     # Aplicamos la función y formateamos el resultado.
     df_groupbybrand['MarkUp'] = df_groupbybrand.apply(markupear, axis=1)
