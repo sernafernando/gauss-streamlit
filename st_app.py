@@ -768,7 +768,7 @@ else:
     # Formatear los totales
     total_limpio = df_merged[df_merged['Fecha'].notna()]['Limpio'].sum()
     total_costo = df_merged[df_merged['Fecha'].notna()]['costo_total'].sum()
-    total_ventas_ml = df_merged[df_merged['Fecha'].notna()]['Monto_Total_sin_IVA'].sum()
+    total_ventas_ml = df_merged[df_merged['Fecha'].notna()]['Monto_Total'].sum()
     total_comision = df_merged[df_merged['Fecha'].notna()]['Comisión en pesos'].sum()
     total_markup = ((total_limpio / total_costo)-1)*100
     total_ganancia = total_limpio - total_costo
