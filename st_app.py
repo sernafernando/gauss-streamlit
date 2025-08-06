@@ -87,10 +87,10 @@ else:
             valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=1095)
             valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=2190)
             valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=2628)
-            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=5.5)
+            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=6.0)
             from_date = st.date_input("Escriba fecha de inicio", value=from_date)
             to_date = st.date_input("Escriba fecha de fin", value=to_date)
-            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=3000)  # Por ejemplo, 3000
+            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=3650)  # Por ejemplo, 3000
             ganancia_flex = st.number_input("Escriba la ganancia de envío Flex", value=1800)  # Por ejemplo, 1800
             
 
