@@ -532,12 +532,12 @@ else:
         np.where(df_merged['original_date'] >= pd.Timestamp("2025-02-26"),
             np.where(df_merged['original_date'] >= pd.Timestamp("2025-03-11"),
                 np.where(df_merged['Monto_Unitario'] >= 33000,
-                    (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva)  * cantidad) + varios_sin_iva_q1_2025),
+                    (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva)  * cantidad) + varios_sin_iva),
                     np.where(df_merged['Monto_Unitario'] < 15000,
-                        (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_fijo_sin_iva_q1_2025) * cantidad) + varios_sin_iva_q1_2025,
+                        (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_fijo_sin_iva_q1_2025) * cantidad) + varios_sin_iva,
                         np.where(df_merged['Monto_Unitario'] < 24000,
-                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_max_fijo_sin_iva_q1_2025) * cantidad) + varios_sin_iva_q1_2025 ,
-                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_free_sin_iva_q1_2025) * cantidad) + varios_sin_iva_q1_2025,
+                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_max_fijo_sin_iva_q1_2025) * cantidad) + varios_sin_iva ,
+                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_free_sin_iva_q1_2025) * cantidad) + varios_sin_iva,
                         )
                     )                 
                 ),
