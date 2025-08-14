@@ -16,6 +16,7 @@ import plotly.express as px
 from streamlit_dynamic_filters import DynamicFilters
 from pygwalker.api.streamlit import StreamlitRenderer
 import time
+from streamlit_gsheets import GSheetsConnection
  
 
 # Set page config
@@ -977,7 +978,9 @@ else:
     last_day = df_filter['Fecha'].max() + timedelta(days=1)
     day_before = last_day - pd.Timedelta(days=1)  # Obtener la fecha de ayer
 
-    dynamic_filters = DynamicFilters(df_filter, filters=['Marca','SubCategoría','Categoría', 'Descripción'])
+    keys = ['Marca','SubCategoría','Categoría','Descripción']
+
+    dynamic_filters = DynamicFilters(df_filter, filters=keys)
 
     dynamic_filters.display_filters(location='columns', num_columns=4, gap='small')
 
@@ -990,13 +993,41 @@ else:
 
     df_filter = filtered_df
 
+    # Crear conexión y leer hoja
+    conn = st.connection("gsheets", type=GSheetsConnection)
+    df_gsheet = conn.read(worksheet="Aportes")
+
+    # Convertir columna Fecha a datetime (acepta texto y seriales de Sheets/Excel)
+    df_gsheet["Fecha"] = pd.to_datetime(
+        df_gsheet["Fecha"],
+        errors="coerce",
+        dayfirst=True  # porque en Argentina usamos dd/mm/yyyy
+    )
+
+    # Asegurar que start_date y end_date sean Timestamp
+    start = pd.to_datetime(start_date)
+    end = pd.to_datetime(end_date)
+
+    # Filtrar rango de fechas
+    df_gsheet_filtered = df_gsheet[
+        (df_gsheet["Fecha"] >= start) &
+        (df_gsheet["Fecha"] <= end)
+    ]
+
+    marcas_seleccionadas = filtered_df['Marca'].dropna().unique()
+    categorias_seleccionadas = filtered_df['Categoría'].dropna().unique()
+    #   Filtrar df_gsheet por esas marcas
+    df_gsheet_filtrado = df_gsheet[df_gsheet['Marca'].isin(marcas_seleccionadas) & df_gsheet['Categoría'].isin(categorias_seleccionadas)]
+
+    suma_aportes = df_gsheet_filtrado.loc[df_gsheet_filtrado["MKT"] != True, "Fondo $"].sum()
+
     # Formatear los totales
     total_limpio_filtered = df_filter['Limpio'].sum()
     total_costo_filtered = df_filter['costo_total'].sum()
     total_comision_filtered = df_filter['Comisión en pesos'].sum()
-    total_markup_filtered = (((total_limpio_filtered - variable_ajuste_filtered) / total_costo_filtered) - 1) * 100
+    total_markup_filtered = (((total_limpio_filtered - variable_ajuste_filtered + suma_aportes) / total_costo_filtered) - 1) * 100
     total_venta_ml_filtered = df_filter['Monto_Total'].sum()
-    total_ganancia_filtered = total_limpio_filtered - total_costo_filtered - variable_ajuste_filtered
+    total_ganancia_filtered = total_limpio_filtered - total_costo_filtered - variable_ajuste_filtered + suma_aportes
 
 
 
@@ -1122,7 +1153,6 @@ else:
     filtered_df = df_filter[st.session_state.selected_columns]
 
 
-
     # Mostrar el DataFrame filtrado
     #with st.expander("DataFrame filtrado:"):
     #    st.dataframe(filtered_df)
@@ -1142,6 +1172,7 @@ else:
     df_groupbyitem['MarkUp'] = df_groupbyitem.apply(markupear, axis=1)
     df_groupbyitem['MarkUp'] = df_groupbyitem['MarkUp'].apply(lambda x: f"{x:.2f}%")
 
+    st.dataframe(df_gsheet_filtrado)
 
     with st.expander("Agrupado por Marcas:"):
         st.dataframe(df_groupbybrand)
@@ -1153,3 +1184,4 @@ else:
 
     with st.expander("Agrupado por Productos:"):
         st.dataframe(df_final)
+

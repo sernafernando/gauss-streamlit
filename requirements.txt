@@ -8,3 +8,4 @@ matplotlib
 plotly
 pygwalker
 streamlit_dynamic_filters
+st-gsheets-connection
