@@ -640,6 +640,14 @@ else:
         porcentaje_full = (total_full / total_operaciones) * 100
         return total_operaciones, total_flex, total_colecta, total_retiros, total_full, porcentaje_flex, porcentaje_colecta, porcentaje_retiros, porcentaje_full
 
+    def calcular_premium(df):
+        total_operaciones = df[df['Fecha'].notna()]['Limpio'].count()
+        total_clasica = df[(df['priceList'].isin([4,10,12]) ) & (df['Fecha'].notna())]['Limpio'].count()
+        total_premium = total_operaciones - total_clasica
+        porcentaje_clasica = (total_clasica / total_operaciones) * 100
+        porcentaje_premium = (total_premium / total_operaciones) * 100
+        return total_operaciones, total_clasica, total_premium, porcentaje_clasica, porcentaje_premium
+
     def display_top_10_marcas(df):
     # Agrupar por 'Marca' y sumar 'Monto_Total'
         df_grouped = df.groupby('Marca', as_index=False)['Monto_Total'].sum()
@@ -779,6 +787,50 @@ else:
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
 
+    def torta_publis(df):
+        # Calcular los totales y porcentajes
+        total_operaciones, total_clasica, total_premium, porcentaje_clasica, porcentaje_premium = calcular_premium(df)
+        
+        # Crear diccionario de valores
+        total_operaciones_dict = {
+            "Total Clásica": total_clasica,
+            "Total Premium": total_premium
+        }
+        
+        # Preparar datos para el gráfico
+        labels = list(total_operaciones_dict.keys())
+        sizes = list(total_operaciones_dict.values())
+        
+        # Calcular porcentajes
+        total = sum(sizes)
+        porcentajes = [size / total * 100 for size in sizes]
+
+        # Crear una lista de etiquetas con valores y porcentajes
+        labels_with_values = [f"{label} ({size} - {pct:.1f}%)" for label, size, pct in zip(labels, sizes, porcentajes)]
+
+        colors =  plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(total_operaciones_dict))) # Colores personalizados
+        explode = [0] * len(sizes)  # Debe coincidir con la cantidad de sectores
+
+        # Crear el gráfico de torta
+        fig, ax = plt.subplots(facecolor='none')  # Fondo de la figura transparente
+        ax.set_facecolor('none')  # Fondo del eje transparente
+
+        # Crear el gráfico de torta
+        wedges, texts = ax.pie(
+            sizes, labels=None, startangle=90,
+            colors=colors, explode=explode, pctdistance=0.85
+        )
+        ax.axis('equal')  # Hace que el gráfico sea un círculo
+
+        # Añadir título
+        #ax.set_title("Distribución de Operaciones", fontsize=14)
+
+        # Agregar leyenda con valores y porcentajes
+        ax.legend(wedges, labels_with_values, title=f"Operaciones: {total_operaciones}",  loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=2)
+
+        # Mostrar el gráfico en Streamlit
+        st.pyplot(fig)
+
     # Definimos la variable para calcular los delta
     #def calcular_delta(df,title,last_day,day_before):
     #    if title == "MarkUp":
@@ -874,9 +926,15 @@ else:
             st.metric("Total Limpio", f"$ {total_limpio:,.0f}".replace(',', '.'))  # Muestra el total_limpio
             st.metric("Total Ganancia", f"$ {total_ganancia:,.0f}".replace(',', '.'))  # Muestra el total_ganancia
             st.metric("Total Markup", f"{total_markup:,.2f}%".replace(',', '.'))  # Muestra el total_markup
+    with col_over_envios[1]:
+        st.selectbox("Seleccionar gráfico", ["Gráfico de envíos", "Gráfico de publicaciones"], key="torta_envios")
     with col_under_envios[1]:
-        st.markdown("#### Detalle de envíos:")
-        prueba_torta(df_merged)
+        if st.session_state.torta_envios == "Gráfico de envíos":
+            st.markdown("### Detalle de envíos")
+            prueba_torta(df_merged)
+        elif st.session_state.torta_envios == "Gráfico de publicaciones":
+            st.markdown("### Detalle de publicaciones")
+            torta_publis(df_merged)
     with col_over_envios[2]:
         seleccionar_grafico = st.selectbox("Seleccionar gráfico", ["Top 10 Marcas por Facturación", "Top 10 SubCategoría por Facturación", "Top 10 Categoría por Facturación", "Top 10 Productos por Facturación","Top 10 Marcas por Ventas", "Top 10 SubCategoría por Ventas", "Top 10 Categoría por Ventas", "Top 10 Productos por Ventas"])
     with col_under_envios[2]:
@@ -1017,9 +1075,9 @@ else:
     marcas_seleccionadas = filtered_df['Marca'].dropna().unique()
     categorias_seleccionadas = filtered_df['Categoría'].dropna().unique()
     #   Filtrar df_gsheet por esas marcas
-    df_gsheet_filtrado = df_gsheet[df_gsheet['Marca'].isin(marcas_seleccionadas) & df_gsheet['Categoría'].isin(categorias_seleccionadas)]
+    df_gsheet_filtrado = df_gsheet_filtered[(df_gsheet_filtered['Marca'].isin(marcas_seleccionadas) | df_gsheet_filtered['Marca'].isnull()) & (df_gsheet_filtered['Categoría'].isin(categorias_seleccionadas) | df_gsheet_filtered['Categoría'].isnull())]
 
-    suma_aportes = df_gsheet_filtrado.loc[df_gsheet_filtrado["MKT"] != True, "Fondo $"].sum()
+    suma_aportes = df_gsheet_filtrado.loc[df_gsheet_filtrado["Aplica"] == True, "Fondo $"].sum()
 
     # Formatear los totales
     total_limpio_filtered = df_filter['Limpio'].sum()
@@ -1099,8 +1157,13 @@ else:
             st.metric("Total Markup", f"{total_markup_filtered:,.2f}%".replace(',', '.'))  # Muestra el total_markup
 
     with col_under_flex[1]:
-        st.markdown("#### Detalle de envíos filtrados:")
-        prueba_torta(df_filter)
+        st.selectbox("Seleccionar gráfico", ["Gráfico de envíos", "Gráfico de publicaciones"], key="torta_envios_filtrado")
+        if st.session_state.torta_envios_filtrado == "Gráfico de envíos":
+            st.markdown("##### Detalle de envíos filtrados:")
+            prueba_torta(df_filter)
+        elif st.session_state.torta_envios_filtrado == "Gráfico de publicaciones":
+            st.markdown("##### Detalle de publicaciones filtrados:")
+            torta_publis(df_filter)
 
     with col_under_flex[2]:
             if seleccionar_grafico_filtrado == "Top 10 SubCategoría por Facturación":
