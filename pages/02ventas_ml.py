@@ -24,7 +24,7 @@ st.logo(image="images/white-g-logo.png",
 with st.sidebar:
     st.header("⚙️ Opciones")
     # Seleccionar fechas de inicio y fin
-    time_frame = st.selectbox("Seleccionar periodo", ("Todo el tiempo", "Último año calendario", "Últimos 12 meses", "Últimos 6 meses", "Últimos 3 meses", "Último mes"), index=5)
+    time_frame = st.selectbox("Seleccionar periodo", ("Último mes", "Últimos 3 meses", "Últimos 6 meses", "Últimos 12 meses", "Último año calendario", "Todo el tiempo"), index=0)
     #from_date = st.date_input("Escriba fecha de inicio", value=datetime.date(2024, 10, 1))
     #to_date = st.date_input("Escriba fecha de fin", value=datetime.date(2024, 10, 31))
     today = (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)

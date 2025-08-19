@@ -466,13 +466,28 @@ else:
         8: [16, None, 23.4, 27.9, 32.5, 37, None, 4.83, 13.73, 19.73, 24.73, 16, 23.4, 27.9, 32.5, 37, 30.33,30]
     }
 
+    data_prices_ago_25 = {
+        'pricelist3': [4, 5, 17, 14, 13, 23, 9, 10, 11, 15, 16, 12, 18, 19, 20, 21, 22,6],
+        1: [15.5, None, 25, 30.9, 37, 42.9, None, 4.83, 13.73, 19.73, 24.73, 15.5, 25, 30.9, 37, 42.9, 30.33,29.5],
+        2: [12.15, None, 21.65, 27.55, 40.05, 39.55, None, 4.83, 13.73, 19.73, 24.73, 12.15, 21.65, 27.55, 40.05, 39.55, 30.33,26.15],
+        3: [12.65, None, 22.15, 28.05, 34.15, 40.05, None, 4.83, 13.73, 19.73, 24.73, 12.65, 22.15, 28.05, 34.15, 40.05, 30.33,26.65],
+        4: [13.65, None, 23.15, 29.05, 35.15, 41.05, None, 4.83, 13.73, 19.73, 24.73, 13.65, 23.15, 29.05, 35.15, 41.05, 30.33,27.65],
+        5: [14, None, 23.5, 29.4, 35.5, 41.4, None, 4.83, 13.73, 19.73, 24.73, 14, 23.5, 29.4, 35.5, 41.4, 30.33,28],
+        6: [14.5, None, 24, 29.9, 36, 41.9, None, 4.83, 13.73, 19.73, 24.73, 14.5, 24, 29.9, 36, 41.9, 30.33,28.5],
+        7: [15, None, 24.5, 30.4, 36.5, 42.4, None, 4.83, 13.73, 19.73, 24.73, 15, 24.5, 30.4, 36.5, 42.4, 30.33,29],
+        8: [16, None, 25.5, 31.4, 37.5, 43.4, None, 4.83, 13.73, 19.73, 24.73, 16, 25.5, 31.4, 37.5, 43.4, 30.33,30]
+    }
+
     # Crear DataFrame de precios
     df_prices = pd.DataFrame(data_prices)
     df_prices_feb_25 = pd.DataFrame(data_prices_feb_25)
+    df_prices_ago_25 = pd.DataFrame(data_prices_ago_25)
 
     # Primero, asegurémonos de que la columna 'pricelist' en df_prices sea un valor único para los precios.
     df_prices_melted = df_prices.melt(id_vars='pricelist', var_name='subcat_id', value_name='Comisión')
     df_prices_feb_25_melted = df_prices_feb_25.melt(id_vars='pricelist2', var_name='subcat_id2', value_name='Comisión_feb_25')
+    df_prices_ago_25_melted = df_prices_ago_25.melt(id_vars='pricelist3', var_name='subcat_id3', value_name='Comisión_ago_25')
+
 
     # Ahora, fusionamos df_merged con df_prices_melted
     df_merged = df_merged.merge(
@@ -489,18 +504,27 @@ else:
         how='left'
     )
 
+    df_merged = df_merged.merge(
+        df_prices_ago_25_melted,
+        left_on=['priceList', 'subcat_id'],
+        right_on=['pricelist3', 'subcat_id3'],
+        how='left'
+    )
+
     # Eliminamos pricelist
     df_merged.drop(columns=['pricelist'], inplace=True)
     df_merged.drop(columns=['pricelist2'], inplace=True)
-
+    df_merged.drop(columns=['pricelist3'], inplace=True)
 
     # Declaro las varibles para purgar las fórmulas
     unitario_sin_iva = df_merged['Monto_Unitario'] / (1 + df_merged['IVA']/100)
     total_sin_iva = df_merged['Monto_Total'] / (1 + df_merged['IVA']/100)
     cantidad = df_merged['Cantidad']
     comision_febrero = df_merged['Comisión_feb_25'] / 100
+    comision_agosto = df_merged['Comisión_ago_25'] / 100
     comision_vieja = df_merged['Comisión'] / 100
     comision_febrero_sin_iva = comision_febrero / 1.21
+    comision_agosto_sin_iva = comision_agosto / 1.21
     comision_vieja_sin_iva = comision_vieja / 1.21
     varios_sin_iva = total_sin_iva * (varios_percent / 100)
     varios_sin_iva_q1_2025 = total_sin_iva * 0.055
@@ -521,12 +545,12 @@ else:
     # Calculamos la comisión en pesos
     df_merged['Comisión en pesos'] = np.where(df_merged['original_date'] >= pd.Timestamp("2025-08-04"),
         np.where(df_merged['Monto_Unitario'] >= min_free,
-                    (((df_merged['Monto_Unitario'] * comision_febrero_sin_iva)  * cantidad) + varios_sin_iva),
+                    (((df_merged['Monto_Unitario'] * comision_agosto_sin_iva)  * cantidad) + varios_sin_iva),
                     np.where(df_merged['Monto_Unitario'] < min_fijo,
-                        (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_fijo_sin_iva) * cantidad) + varios_sin_iva,
+                        (((df_merged['Monto_Unitario']  * comision_agosto_sin_iva) + valor_fijo_sin_iva) * cantidad) + varios_sin_iva,
                         np.where(df_merged['Monto_Unitario'] < max_fijo,
-                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_max_fijo_sin_iva) * cantidad) + varios_sin_iva ,
-                            (((df_merged['Monto_Unitario']  * comision_febrero_sin_iva) + valor_free_sin_iva) * cantidad) + varios_sin_iva,
+                            (((df_merged['Monto_Unitario']  * comision_agosto_sin_iva) + valor_max_fijo_sin_iva) * cantidad) + varios_sin_iva ,
+                            (((df_merged['Monto_Unitario']  * comision_agosto_sin_iva) + valor_free_sin_iva) * cantidad) + varios_sin_iva,
                         )
                     )                 
                 ),                     
