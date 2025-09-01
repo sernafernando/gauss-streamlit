@@ -686,7 +686,7 @@ else:
         fig = px.bar(top_10_marcas, x='Marca', y='Facturación ML',
                 title='Top 10 Marcas por Facturación')
         
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, key=f"top_10_marcas_{id(fig)}")
 
     def display_top_10_categorias(df):
     # Agrupar por 'Marca' y sumar 'Monto_Total'
@@ -702,7 +702,7 @@ else:
         fig = px.bar(top_10_marcas, x='Categoría', y='Facturación ML',
                 title='Top 10 Categoría por Facturación')
         
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, key=f"top_10_categorias_{id(fig)}")
 
     def display_top_10_subcategorias(df):
     # Agrupar por 'Marca' y sumar 'Monto_Total'
@@ -718,7 +718,7 @@ else:
         fig = px.bar(top_10_marcas, x='SubCategoría', y='Facturación ML',
                 title='Top 10 SubCategoría por Facturación')
         
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, key=f"top_10_subcategorias_{id(fig)}")
 
     def display_top_10_productos(df):
     # Agrupar por 'Marca' y sumar 'Monto_Total'
@@ -738,7 +738,7 @@ else:
         fig = px.bar(top_10_productos, x='Producto', y='Facturación ML',
                 title='Top 10 Producto por Facturación')
         
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, key=f"top_10_productos_{id(fig)}")
 
     def display_top_10_gen(df, col1, col2, label1, label2):
     # Agrupar por 'Marca' y sumar 'Monto_Total'
@@ -758,7 +758,8 @@ else:
         fig = px.bar(top_10, x=label1, y=label2,
                 title=f'Top 10 {label1}s por {label2}')
         
-        st.plotly_chart(fig)
+        st.plotly_chart(fig, key=f"top_10_{label1}_{id(fig)}")
+
 
 
     # Aplicamos la función y formateamos el resultado.
