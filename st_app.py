@@ -91,17 +91,17 @@ else:
             to_date = today
 
         with st.expander("Parámetros"):
-            min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=MINFIJO)
-            max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=MAXFIJO)
-            min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=MINFREE)
-            valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=VALORFIJO)
-            valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=VALORMAXFIJO)
-            valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=VALORFREE)
-            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=VARIOSPERCENT)
+            min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=int(MINFIJO))
+            max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=int(MAXFIJO))
+            min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=int(MINFREE))
+            valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=int(VALORFIJO))
+            valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=int(VALORMAXFIJO))
+            valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=int(VALORFREE))
+            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=float(VARIOSPERCENT))
             from_date = st.date_input("Escriba fecha de inicio", value=from_date)
             to_date = st.date_input("Escriba fecha de fin", value=to_date)
-            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=GASTOENVIOFLEX)  # Por ejemplo, 3000
-            ganancia_flex = st.number_input("Escriba la ganancia de envío Flex", value=GANANCIASFLEX)  # Por ejemplo, 1800
+            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=int(GASTOENVIOFLEX))
+            ganancia_flex = st.number_input("Escriba la ganancia de envío Flex", value=int(GANANCIASFLEX))
             
 
         st.session_state["from_date"] = from_date
