@@ -31,6 +31,15 @@ except locale.Error:
 
 # Define tu contraseña
 PASSWORD = st.secrets["api"]["site_password"]
+MINFIJO = st.secrets["vars"]["min_fijo"]
+MAXFIJO = st.secrets["vars"]["max_fijo"]
+MINFREE = st.secrets["vars"]["min_free"]
+VALORFIJO = st.secrets["vars"]["valor_fijo"]
+VALORMAXFIJO = st.secrets["vars"]["valor_max_fijo"]
+VALORFREE = st.secrets["vars"]["valor_free"]
+VARIOSPERCENT = st.secrets["vars"]["varios_percent"]
+GASTOENVIOFLEX = st.secrets["vars"]["gasto_envio_flex"]
+GANANCIASFLEX = st.secrets["vars"]["ganancia_flex"]
 
 # Usa session_state para controlar el acceso
 if "authenticated" not in st.session_state:
@@ -82,17 +91,17 @@ else:
             to_date = today
 
         with st.expander("Parámetros"):
-            min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=15000)
-            max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=24000)
-            min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=33000)
-            valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=1095)
-            valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=2190)
-            valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=2628)
-            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=6.0)
+            min_fijo = st.number_input("Escriba el monto mínimo designado por ML", value=MINFIJO)
+            max_fijo = st.number_input("Escriba el monto máximo designado por ML", value=MAXFIJO)
+            min_free = st.number_input("Escriba el monto mínimo para envío gratuito designado por ML", value=MINFREE)
+            valor_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_fijo}", value=VALORFIJO)
+            valor_max_fijo = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {max_fijo}", value=VALORMAXFIJO)
+            valor_free  = st.number_input(f"Escriba el valor fijo designado por ML para montos menores a {min_free}", value=VALORFREE)
+            varios_percent = st.number_input("Escriba el porcentaje para montos varios", value=VARIOSPERCENT)
             from_date = st.date_input("Escriba fecha de inicio", value=from_date)
             to_date = st.date_input("Escriba fecha de fin", value=to_date)
-            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=3650)  # Por ejemplo, 3000
-            ganancia_flex = st.number_input("Escriba la ganancia de envío Flex", value=1800)  # Por ejemplo, 1800
+            gasto_envio_flex = st.number_input("Escriba el gasto de envío Flex", value=GASTOENVIOFLEX)  # Por ejemplo, 3000
+            ganancia_flex = st.number_input("Escriba la ganancia de envío Flex", value=GANANCIASFLEX)  # Por ejemplo, 1800
             
 
         st.session_state["from_date"] = from_date
